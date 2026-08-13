@@ -554,13 +554,18 @@ document.getElementById('orcForm').addEventListener('submit', async (e) => {
     obs:         fd.get('obs').trim(),
   };
 
+  const _now = new Date();
+  const _p = n => String(n).padStart(2,'0');
+  const orcId = `ORC-${_now.getFullYear()}${_p(_now.getMonth()+1)}${_p(_now.getDate())}-${_p(_now.getHours())}${_p(_now.getMinutes())}`;
+
   const fields = {
+    'ID':                 orcId,
     'Nome do Cliente':    d.nome,
     'Telefone':           d.telefone,
     'Tipo de Serviço':    d.servico,
     'Valor do Orçamento': d.valor,
     'Status':             'Enviado',
-    'Data do Orçamento':  new Date().toISOString().split('T')[0],
+    'Data do Orçamento':  _now.toISOString().split('T')[0],
   };
   if(d.email)       fields['Email']               = d.email;
   if(d.endereco)    fields['Endereço do Evento']  = d.endereco;
