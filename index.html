@@ -34,7 +34,7 @@ body {
   padding: 24px 20px;
   text-align: center;
   position: sticky;
-  top: 0;
+  top: 52px; /* fica abaixo da navbar (52px de altura) */
   z-index: 100;
   backdrop-filter: blur(8px);
 }
@@ -617,16 +617,30 @@ document.getElementById('orcForm').addEventListener('submit', async (e) => {
       headers:{'Authorization':`Bearer ${_t}`,'Content-Type':'application/json'},
       body: JSON.stringify({fields})
     });
-    if(!res.ok) { const t = await res.text(); throw new Error(t); }
-    gerarPDF(d);
+    if(!res.ok) {
+      const errBody = await res.text();
+      let msg = 'Erro ao salvar. Tente novamente.';
+      try { const j = JSON.parse(errBody); msg = j.error?.message || j.message || msg; } catch(_){}
+      throw new Error(msg);
+    }
+    // ✅ Registro salvo — mostrar sucesso ANTES de gerar o PDF
     document.getElementById('formWrap').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   } catch(ex) {
     console.error(ex);
-    err.textContent = 'Erro ao salvar no Airtable. Verifique sua conexão e tente novamente.';
+    err.textContent = ex.message || 'Erro ao salvar. Verifique sua conexão e tente novamente.';
     err.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Salvar orçamento e baixar PDF';
+    return; // Não gerar PDF se o save falhou
+  }
+
+  // Gerar PDF separadamente — falha no PDF não afeta o registro salvo
+  try {
+    gerarPDF(d);
+  } catch(pdfEx) {
+    console.error('Erro ao gerar PDF:', pdfEx);
+    // PDF falhou mas o registro já foi salvo — não mostrar erro crítico
   }
 });
 
@@ -659,15 +673,18 @@ window.initMaps = function() {
 };
 
 window.mapsError = function() {
-  document.getElementById('mapsHint').textContent = '⚠ Places API não ativada. Preencha o endereço manualmente.';
-  document.getElementById('mapsHint').style.color = 'var(--error)';
+  const hint = document.getElementById('mapsHint');
+  if(hint) { hint.textContent = '⚠ Autocomplete indisponível. Preencha o endereço manualmente.'; hint.style.color = 'var(--error)'; }
 };
+// Auth failure do Google Maps (chave inválida, faturamento etc.)
+window.gm_authFailure = window.mapsError;
 
 (function() {
   const k = [atob('QUl6YVN5QXJqVldGZ3lVSFAtb0Y='), atob('cjhWckZTLTZveUhocXhkbUtxSQ==')].join('');
   const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${k}&libraries=places&callback=initMaps&onerror=mapsError`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${k}&libraries=places&callback=initMaps`;
   s.async = true; s.defer = true;
+  s.onerror = window.mapsError; // captura erros de rede/carregamento
   document.head.appendChild(s);
 })();
 </script>
