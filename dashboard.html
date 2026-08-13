@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Andressa Pimentel · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:      #0d0c0b;
+  --surface: #141210;
+  --border:  #2e2820;
+  --gold:    #c9a96e;
+  --gold-d:  #8a6e3e;
+  --text:    #e8ddd0;
+  --muted:   #7a6e62;
+  --green:   #6aaf7e;
+  --red:     #c0614e;
+  --blue:    #5b8db8;
+  --yellow:  #c9a030;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:2px;color:var(--gold)}
+.nav-links{display:flex;gap:4px}
+.nav-link{padding:8px 16px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;border-bottom:2px solid transparent}
+.nav-link:hover{color:var(--text)}
+.nav-link.active{color:var(--gold);border-bottom-color:var(--gold)}
+.nav-refresh{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.nav-refresh:hover{border-color:var(--gold);color:var(--gold)}
+
+/* MAIN */
+main{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+
+/* PAGE TITLE */
+.page-title{margin-bottom:32px}
+.page-title h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;letter-spacing:1px;margin-bottom:4px}
+.page-title p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+/* LOADING */
+.loading{text-align:center;padding:80px 20px;color:var(--muted)}
+.loading .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.card.green::before{background:var(--green)}
+.card.red::before{background:var(--red)}
+.card.blue::before{background:var(--blue)}
+.card.yellow::before{background:var(--yellow)}
+.card-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.card-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1;margin-bottom:4px}
+.card-value.money{font-size:22px}
+.card-sub{font-size:10px;color:var(--muted);margin-top:6px}
+.card-icon{position:absolute;bottom:14px;right:16px;font-size:22px;opacity:.15}
+
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid var(--border);padding:24px}
+.chart-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.chart-wrap{position:relative;height:220px}
+
+/* FULL WIDTH CHART */
+.chart-full{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:24px}
+.chart-wrap-wide{position:relative;height:200px}
+
+/* TABLE */
+.table-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
+.table-count{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#181614}
+.badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px;font-weight:400}
+.badge-fechado{background:rgba(106,175,126,.15);color:#6aaf7e}
+.badge-perdido{background:rgba(192,97,78,.15);color:#c0614e}
+.badge-enviado{background:rgba(91,141,184,.15);color:#5b8db8}
+.badge-negociando{background:rgba(201,160,48,.15);color:#c9a030}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px;color:var(--muted);font-size:13px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .cards{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  th:nth-child(3),th:nth-child(5),td:nth-child(3),td:nth-child(5){display:none}
+}
+@media(max-width:480px){
+  .cards{grid-template-columns:1fr}
+  nav{padding:0 16px}
+  .nav-logo{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Andressa Pimentel</span>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Orçamento</a>
+    <a class="nav-link active" href="dashboard.html">Dashboard</a>
+  </div>
+  <button class="nav-refresh" onclick="loadData()">↻ Atualizar</button>
+</nav>
+
+<main>
+  <div class="page-title">
+    <h1>Dashboard</h1>
+    <p>Visão geral de propostas e conversões</p>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando dados do Airtable…</p>
+  </div>
+
+  <div id="content" style="display:none">
+    <!-- CARDS -->
+    <div class="cards">
+      <div class="card green">
+        <div class="card-label">Receita confirmada</div>
+        <div class="card-value money" id="totalGanho">R$ 0</div>
+        <div class="card-sub" id="countFechado">0 contratos fechados</div>
+        <div class="card-icon">✦</div>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Taxa de conversão</div>
+        <div class="card-value" id="taxaConversao">0%</div>
+        <div class="card-sub" id="convSub">de propostas enviadas</div>
+        <div class="card-icon">◎</div>
+      </div>
+      <div class="card yellow">
+        <div class="card-label">Em aberto</div>
+        <div class="card-value money" id="totalAberto">R$ 0</div>
+        <div class="card-sub" id="countAberto">0 propostas</div>
+        <div class="card-icon">◷</div>
+      </div>
+      <div class="card red">
+        <div class="card-label">Propostas perdidas</div>
+        <div class="card-value money" id="totalPerdido">R$ 0</div>
+        <div class="card-sub" id="countPerdido">0 propostas</div>
+        <div class="card-icon">✕</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Distribuição por status</div>
+        <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Receita por tipo de serviço</div>
+        <div class="chart-wrap"><canvas id="chartServico"></canvas></div>
+      </div>
+    </div>
+
+    <!-- MONTHLY CHART -->
+    <div class="chart-full">
+      <div class="chart-title">Receita confirmada por mês</div>
+      <div class="chart-wrap-wide"><canvas id="chartMensal"></canvas></div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Todas as propostas</span>
+        <span class="table-count" id="totalCount"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Serviço</th>
+              <th>Valor</th>
+              <th>Data</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /content -->
+</main>
+
+<script>
+const _t   = [atob('cGF0TWJ5U1RkYjFBWTNoY0guMTQ1MDNlODRlODI5MDUyNjBkNTc2YzYwYjRhNTk2NzU0'), atob('Yzg1OTFkMGQzNGVjMzdmYjQxMzg0ZTgzNGJkNDZhYg==')].join('');
+const BASE = 'appmWjJHXwYihOkfZ';
+const TBL  = 'Or%C3%A7amentos';
+
+const fmtMoney = v => 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate  = d => { if(!d) return '—'; const [y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; };
+
+const COLORS = {
+  Fechado:    '#6aaf7e',
+  Perdido:    '#c0614e',
+  Enviado:    '#5b8db8',
+  Negociando: '#c9a030',
+};
+
+let chartStatus, chartServico, chartMensal;
+
+async function fetchAll() {
+  let records=[], offset=null;
+  const fields = ['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento'];
+  const fParams = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
+  do {
+    const url = `https://api.airtable.com/v0/${BASE}/${TBL}?${fParams}${offset?'&offset='+offset:''}`;
+    const r = await fetch(url, {headers:{'Authorization':`Bearer ${_t}`}});
+    const d = await r.json();
+    records = records.concat(d.records||[]);
+    offset = d.offset||null;
+  } while(offset);
+  return records;
+}
+
+function buildCharts(records) {
+  const f = r => r.fields;
+
+  // --- Métricas por status ---
+  const byStatus = {};
+  const valByStatus = {};
+  records.forEach(r => {
+    const s = f(r)['Status']||'Sem status';
+    const v = f(r)['Valor do Orçamento']||0;
+    byStatus[s] = (byStatus[s]||0) + 1;
+    valByStatus[s] = (valByStatus[s]||0) + v;
+  });
+
+  const ganho   = valByStatus['Fechado']||0;
+  const perdido = valByStatus['Perdido']||0;
+  const aberto  = (valByStatus['Enviado']||0) + (valByStatus['Negociando']||0);
+  const nFech   = byStatus['Fechado']||0;
+  const nPerd   = byStatus['Perdido']||0;
+  const nAbert  = (byStatus['Enviado']||0) + (byStatus['Negociando']||0);
+  const total   = records.length;
+  const taxa    = total > 0 ? Math.round((nFech/total)*100) : 0;
+
+  document.getElementById('totalGanho').textContent    = fmtMoney(ganho);
+  document.getElementById('countFechado').textContent  = `${nFech} contrato${nFech!==1?'s':''} fechado${nFech!==1?'s':''}`;
+  document.getElementById('taxaConversao').textContent = taxa+'%';
+  document.getElementById('convSub').textContent       = `${nFech} de ${total} proposta${total!==1?'s':''}`;
+  document.getElementById('totalAberto').textContent   = fmtMoney(aberto);
+  document.getElementById('countAberto').textContent   = `${nAbert} proposta${nAbert!==1?'s':''}`;
+  document.getElementById('totalPerdido').textContent  = fmtMoney(perdido);
+  document.getElementById('countPerdido').textContent  = `${nPerd} proposta${nPerd!==1?'s':''}`;
+  document.getElementById('totalCount').textContent    = `${total} registros`;
+
+  const chartCfg = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#7a6e62', font:{family:'Montserrat',size:11}, boxWidth:12 } } }
+  };
+
+  // --- Donut status ---
+  const statusLabels = Object.keys(byStatus);
+  if(chartStatus) chartStatus.destroy();
+  chartStatus = new Chart(document.getElementById('chartStatus'), {
+    type:'doughnut',
+    data:{
+      labels: statusLabels,
+      datasets:[{ data: statusLabels.map(s=>byStatus[s]),
+        backgroundColor: statusLabels.map(s=>COLORS[s]||'#555'),
+        borderColor:'#141210', borderWidth:3 }]
+    },
+    options:{ ...chartCfg, cutout:'65%' }
+  });
+
+  // --- Bar por serviço ---
+  const valByServ = {};
+  records.filter(r=>f(r)['Status']==='Fechado').forEach(r=>{
+    const s = f(r)['Tipo de Serviço']||'Outro';
+    valByServ[s] = (valByServ[s]||0) + (f(r)['Valor do Orçamento']||0);
+  });
+  const servLabels = Object.keys(valByServ).sort((a,b)=>valByServ[b]-valByServ[a]);
+  if(chartServico) chartServico.destroy();
+  chartServico = new Chart(document.getElementById('chartServico'), {
+    type:'bar',
+    data:{
+      labels: servLabels,
+      datasets:[{ data: servLabels.map(s=>valByServ[s]),
+        backgroundColor:'rgba(201,169,110,0.7)', borderColor:'#c9a96e',
+        borderWidth:1, borderRadius:2 }]
+    },
+    options:{ ...chartCfg,
+      plugins:{ ...chartCfg.plugins, legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}}, grid:{color:'#1e1c18'} },
+        y:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:'#1e1c18'} }
+      }
+    }
+  });
+
+  // --- Line receita mensal ---
+  const valByMonth = {};
+  records.filter(r=>f(r)['Status']==='Fechado' && f(r)['Data do Orçamento']).forEach(r=>{
+    const d = f(r)['Data do Orçamento'];
+    const key = d.slice(0,7); // YYYY-MM
+    valByMonth[key] = (valByMonth[key]||0) + (f(r)['Valor do Orçamento']||0);
+  });
+  const months = Object.keys(valByMonth).sort();
+  const fmtMonth = m => { const [y,mo]=m.split('-'); const nms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']; return nms[parseInt(mo)-1]+'/'+y.slice(2); };
+  if(chartMensal) chartMensal.destroy();
+  chartMensal = new Chart(document.getElementById('chartMensal'), {
+    type:'bar',
+    data:{
+      labels: months.map(fmtMonth),
+      datasets:[{ data: months.map(m=>valByMonth[m]),
+        backgroundColor:'rgba(106,175,126,0.6)', borderColor:'#6aaf7e',
+        borderWidth:1, borderRadius:2 }]
+    },
+    options:{ ...chartCfg,
+      plugins:{ ...chartCfg.plugins, legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}}, grid:{color:'#1e1c18'} },
+        y:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{color:'#1e1c18'} }
+      }
+    }
+  });
+
+  // --- Tabela ---
+  const sorted = [...records].sort((a,b)=>{
+    const da = f(a)['Data do Orçamento']||''; const db = f(b)['Data do Orçamento']||'';
+    return db.localeCompare(da);
+  });
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = sorted.length ? sorted.map(r=>{
+    const flds = f(r);
+    const s = flds['Status']||'';
+    const badgeClass = s==='Fechado'?'badge-fechado':s==='Perdido'?'badge-perdido':s==='Negociando'?'badge-negociando':'badge-enviado';
+    return `<tr>
+      <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
+      <td>${flds['Nome do Cliente']||'—'}</td>
+      <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
+      <td style="color:var(--gold)">${flds['Valor do Orçamento']?fmtMoney(flds['Valor do Orçamento']):'—'}</td>
+      <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
+      <td><span class="badge ${badgeClass}">${s||'—'}</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">Nenhum registro encontrado</td></tr>';
+}
+
+async function loadData() {
+  document.getElementById('loading').style.display='block';
+  document.getElementById('content').style.display='none';
+  try {
+    const records = await fetchAll();
+    buildCharts(records);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('content').style.display='block';
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '<p style="color:var(--red)">Erro ao carregar dados. Verifique sua conexão.</p>';
+    console.error(e);
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
