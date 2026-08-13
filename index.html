@@ -411,14 +411,45 @@ const LOGO = 'iVBORw0KGgoAAAANSUhEUgAAAZAAAAELCAYAAAD3HtBMAACKQUlEQVR42uydd3hU1d
 // ─────────────────────────────────────────────────────
 
 // ── Phone mask ──
-document.querySelector('input[name="telefone"]').addEventListener('input', function() {
-  let v = this.value.replace(/\D/g,'');
-  if(v.length > 11) v = v.slice(0,11);
-  if(v.length > 6)      v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-  else if(v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
-  else if(v.length > 0) v = `(${v}`;
-  this.value = v;
-});
+(function() {
+  const ph = document.querySelector('input[name="telefone"]');
+  ph.setAttribute('inputmode', 'tel');
+
+  function getDigits(raw) {
+    let d = raw.replace(/\D/g, '');
+    // Remove prefixo +55 colado do WhatsApp (ex: +55 41 99999-9999)
+    if ((d.length === 13 || d.length === 12) && d.startsWith('55')) d = d.slice(2);
+    if (d.length > 11) d = d.slice(0, 11);
+    return d;
+  }
+
+  function applyMask(digits) {
+    if (digits.length > 6) return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+    if (digits.length > 2) return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+    if (digits.length > 0) return `(${digits}`;
+    return '';
+  }
+
+  ph.addEventListener('input', function() {
+    const pos = this.selectionStart;
+    const old = this.value;
+    const masked = applyMask(getDigits(old));
+    if (masked !== old) {
+      this.value = masked;
+      // Mantém cursor na posição correta ao deletar
+      const diff = masked.length - old.length;
+      const newPos = Math.max(0, pos + diff);
+      try { this.setSelectionRange(newPos, newPos); } catch(e) {}
+    }
+  });
+
+  // Paste do WhatsApp: +55 41 99999-9999 → (41) 99999-9999
+  ph.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const txt = (e.clipboardData || window.clipboardData).getData('text');
+    this.value = applyMask(getDigits(txt));
+  });
+})();
 
 // ── Helpers ──
 const fmtMoney = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
