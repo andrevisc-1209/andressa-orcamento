@@ -162,27 +162,6 @@ textarea { resize: none; height: 80px; min-height: 80px; }
   letter-spacing: .5px;
 }
 
-/* Google autocomplete */
-.pac-container {
-  background: #1c1814 !important;
-  border: 1px solid var(--border) !important;
-  border-top: none !important;
-  font-family: 'Montserrat', sans-serif !important;
-  font-size: 13px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,.6) !important;
-  border-radius: 0 0 2px 2px !important;
-}
-.pac-item {
-  padding: 10px 14px !important;
-  color: var(--text) !important;
-  border-top: 1px solid var(--border) !important;
-  cursor: pointer !important;
-  line-height: 1.4 !important;
-}
-.pac-item:hover, .pac-item-selected { background: #252018 !important; }
-.pac-item-query { color: var(--gold) !important; font-size: 13px !important; }
-.pac-matched { color: var(--gold) !important; }
-.pac-icon { display: none !important; }
 
 /* ── SUBMIT ── */
 .submit-section { margin-top: 8px; }
@@ -266,9 +245,6 @@ footer {
   border-top: 1px solid var(--border);
 }
 
-/* Suprime overlay de erro do Google Maps (chave restrita / sem faturamento) */
-.gm-err-container, .gm-err-content, .gm-err-message,
-.gm-style .gm-style-cc, div[style*="z-index: 10000000"] { display: none !important; }
 
 /* ── MOBILE ── */
 @media (max-width: 480px) {
@@ -359,7 +335,7 @@ footer {
           <div class="addr-wrap">
             <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro, cidade" autocomplete="off"/>
           </div>
-          <p class="addr-hint" id="mapsHint">Aguardando Google Maps…</p>
+          <p class="addr-hint" id="mapsHint">Rua, número, bairro e cidade</p>
         </div>
 
         <div class="grid-2">
@@ -655,53 +631,7 @@ function resetForm() {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── Google Maps Places ──
-window.initMaps = function() {
-  try {
-    const input = document.getElementById('endereco');
-    const ac = new google.maps.places.Autocomplete(input, {
-      componentRestrictions: {country:'br'},
-      fields: ['formatted_address','name'],
-      types: ['establishment','geocode']
-    });
-    ac.addListener('place_changed', () => {
-      const p = ac.getPlace();
-      if(p.formatted_address) input.value = p.formatted_address;
-      else if(p.name) input.value = p.name;
-    });
-    document.getElementById('mapsHint').textContent = 'Digite para ver sugestões de endereço.';
-    document.getElementById('mapsHint').style.color = 'var(--muted)';
-  } catch(e) {
-    document.getElementById('mapsHint').textContent = 'Autocomplete indisponível — preencha manualmente.';
-  }
-};
-
-window.mapsError = function() {
-  const hint = document.getElementById('mapsHint');
-  if(hint) { hint.textContent = 'Preencha o endereço manualmente.'; hint.style.color = 'var(--muted)'; }
-  // Remove dropdown do autocomplete se existir
-  document.querySelectorAll('.pac-container').forEach(el => el.remove());
-  // Substitui o input para remover listeners que o Maps possa ter adicionado
-  const old = document.getElementById('endereco');
-  if(old) {
-    const fresh = old.cloneNode(true);
-    old.parentNode.replaceChild(fresh, old);
-    fresh.focus && fresh.blur(); // garante que está desbloqueado
-  }
-  // Remove qualquer overlay do Maps
-  document.querySelectorAll('.gm-err-container').forEach(el => el.remove());
-};
-// Auth failure do Google Maps (chave restrita, faturamento etc.)
-window.gm_authFailure = window.mapsError;
-
-(function() {
-  const k = [atob('QUl6YVN5QXJqVldGZ3lVSFAtb0Y='), atob('cjhWckZTLTZveUhocXhkbUtxSQ==')].join('');
-  const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${k}&libraries=places&callback=initMaps`;
-  s.async = true; s.defer = true;
-  s.onerror = window.mapsError; // captura erros de rede/carregamento
-  document.head.appendChild(s);
-})();
+// Endereço: campo de texto livre (sem dependência externa)
 </script>
 </body>
 </html>
