@@ -266,6 +266,10 @@ footer {
   border-top: 1px solid var(--border);
 }
 
+/* Suprime overlay de erro do Google Maps (chave restrita / sem faturamento) */
+.gm-err-container, .gm-err-content, .gm-err-message,
+.gm-style .gm-style-cc, div[style*="z-index: 10000000"] { display: none !important; }
+
 /* ── MOBILE ── */
 @media (max-width: 480px) {
   .site-header img { height: 44px; }
@@ -674,9 +678,20 @@ window.initMaps = function() {
 
 window.mapsError = function() {
   const hint = document.getElementById('mapsHint');
-  if(hint) { hint.textContent = '⚠ Autocomplete indisponível. Preencha o endereço manualmente.'; hint.style.color = 'var(--error)'; }
+  if(hint) { hint.textContent = 'Preencha o endereço manualmente.'; hint.style.color = 'var(--muted)'; }
+  // Remove dropdown do autocomplete se existir
+  document.querySelectorAll('.pac-container').forEach(el => el.remove());
+  // Substitui o input para remover listeners que o Maps possa ter adicionado
+  const old = document.getElementById('endereco');
+  if(old) {
+    const fresh = old.cloneNode(true);
+    old.parentNode.replaceChild(fresh, old);
+    fresh.focus && fresh.blur(); // garante que está desbloqueado
+  }
+  // Remove qualquer overlay do Maps
+  document.querySelectorAll('.gm-err-container').forEach(el => el.remove());
 };
-// Auth failure do Google Maps (chave inválida, faturamento etc.)
+// Auth failure do Google Maps (chave restrita, faturamento etc.)
 window.gm_authFailure = window.mapsError;
 
 (function() {
