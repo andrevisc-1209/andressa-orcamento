@@ -7,103 +7,123 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:      #0d0c0b;
-  --surface: #141210;
-  --border:  #2e2820;
-  --gold:    #c9a96e;
-  --gold-d:  #8a6e3e;
-  --text:    #e8ddd0;
-  --muted:   #7a6e62;
-  --green:   #6aaf7e;
-  --red:     #c0614e;
-  --blue:    #5b8db8;
-  --yellow:  #c9a030;
-}
+:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--text:#e8ddd0;--muted:#7a6e62;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
+
+/* PASSWORD GATE */
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.gate-box{background:var(--surface);border:1px solid var(--border);padding:48px 40px;text-align:center;max-width:360px;width:100%}
+.gate-logo{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
+.gate-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:36px}
+.gate-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
+.gate-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:10px 0;outline:none;transition:border-color .2s;margin-bottom:24px}
+.gate-input:focus{border-bottom-color:var(--gold)}
+.gate-btn{width:100%;padding:14px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.gate-btn:hover{background:var(--gold);color:var(--bg)}
+.gate-error{font-size:11px;color:var(--red);margin-top:14px;display:none;letter-spacing:.5px}
 
 /* NAV */
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
 .nav-logo{font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:2px;color:var(--gold)}
 .nav-links{display:flex;gap:4px}
 .nav-link{padding:8px 16px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;border-bottom:2px solid transparent}
-.nav-link:hover{color:var(--text)}
 .nav-link.active{color:var(--gold);border-bottom-color:var(--gold)}
+.nav-link:hover{color:var(--text)}
 .nav-refresh{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .nav-refresh:hover{border-color:var(--gold);color:var(--gold)}
 
 /* MAIN */
-main{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
-
-/* PAGE TITLE */
-.page-title{margin-bottom:32px}
+main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
+.page-title{margin-bottom:28px}
 .page-title h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;letter-spacing:1px;margin-bottom:4px}
 .page-title p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
 
 /* LOADING */
 .loading{text-align:center;padding:80px 20px;color:var(--muted)}
-.loading .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* SECTION HEADER */
+.sec-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-d);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
 /* CARDS */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px}
 .card{background:var(--surface);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .card.green::before{background:var(--green)}
 .card.red::before{background:var(--red)}
 .card.blue::before{background:var(--blue)}
 .card.yellow::before{background:var(--yellow)}
+.card.gold::before{background:var(--gold)}
 .card-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .card-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1;margin-bottom:4px}
-.card-value.money{font-size:22px}
+.card-value.sm{font-size:20px}
 .card-sub{font-size:10px;color:var(--muted);margin-top:6px}
-.card-icon{position:absolute;bottom:14px;right:16px;font-size:22px;opacity:.15}
+.card-icon{position:absolute;bottom:14px;right:16px;font-size:22px;opacity:.12}
 
-/* CHARTS ROW */
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .chart-card{background:var(--surface);border:1px solid var(--border);padding:24px}
 .chart-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
-.chart-wrap{position:relative;height:220px}
+.chart-wrap{position:relative;height:210px}
+.chart-wrap-wide{position:relative;height:190px}
+.chart-full{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:12px}
 
-/* FULL WIDTH CHART */
-.chart-full{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:24px}
-.chart-wrap-wide{position:relative;height:200px}
+/* SERVICE BI TABLE */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.svc-card{background:var(--surface);border:1px solid var(--border);padding:18px 20px}
+.svc-name{font-size:11px;letter-spacing:1px;color:var(--gold);margin-bottom:12px;text-transform:uppercase}
+.svc-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.svc-key{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.svc-val{font-size:13px;color:var(--text)}
+.svc-bar{height:2px;background:var(--border);margin-top:10px;border-radius:1px;overflow:hidden}
+.svc-bar-fill{height:100%;background:var(--gold);border-radius:1px;transition:width .6s ease}
 
 /* TABLE */
 .table-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
 .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
-.table-count{font-size:11px;color:var(--muted)}
 table{width:100%;border-collapse:collapse}
 th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
 td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#181614}
-.badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px;font-weight:400}
+.badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px}
 .badge-fechado{background:rgba(106,175,126,.15);color:#6aaf7e}
 .badge-perdido{background:rgba(192,97,78,.15);color:#c0614e}
 .badge-enviado{background:rgba(91,141,184,.15);color:#5b8db8}
 .badge-negociando{background:rgba(201,160,48,.15);color:#c9a030}
+.conv-sim{color:#6aaf7e;font-size:12px}
+.conv-nao{color:#c0614e;font-size:12px}
 
-/* EMPTY */
-.empty{text-align:center;padding:48px;color:var(--muted);font-size:13px}
-
-/* RESPONSIVE */
-@media(max-width:768px){
+@media(max-width:900px){
   .cards{grid-template-columns:1fr 1fr}
+  .svc-grid{grid-template-columns:1fr 1fr}
   .charts-row{grid-template-columns:1fr}
-  th:nth-child(3),th:nth-child(5),td:nth-child(3),td:nth-child(5){display:none}
+  th:nth-child(5),td:nth-child(5){display:none}
 }
 @media(max-width:480px){
   .cards{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:1fr}
   nav{padding:0 16px}
-  .nav-logo{font-size:13px}
+  th:nth-child(3),td:nth-child(3){display:none}
 }
 </style>
 </head>
 <body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">Andressa Pimentel</div>
+    <div class="gate-sub">Fotografia · Área restrita</div>
+    <label class="gate-label">Senha de acesso</label>
+    <input class="gate-input" id="pwdInput" type="password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <button class="gate-btn" onclick="checkPwd()">Entrar</button>
+    <div class="gate-error" id="pwdErr">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
 
 <nav>
   <span class="nav-logo">Andressa Pimentel</span>
@@ -122,61 +142,79 @@ tr:hover td{background:#181614}
 
   <div id="loading" class="loading">
     <div class="spinner"></div>
-    <p>Carregando dados do Airtable…</p>
+    <p>Carregando dados…</p>
   </div>
 
   <div id="content" style="display:none">
-    <!-- CARDS -->
+
+    <div class="sec-title">Visão geral</div>
     <div class="cards">
       <div class="card green">
         <div class="card-label">Receita confirmada</div>
-        <div class="card-value money" id="totalGanho">R$ 0</div>
-        <div class="card-sub" id="countFechado">0 contratos fechados</div>
+        <div class="card-value sm" id="totalGanho">—</div>
+        <div class="card-sub" id="countConverteu">—</div>
         <div class="card-icon">✦</div>
       </div>
       <div class="card blue">
         <div class="card-label">Taxa de conversão</div>
-        <div class="card-value" id="taxaConversao">0%</div>
-        <div class="card-sub" id="convSub">de propostas enviadas</div>
+        <div class="card-value" id="taxaConversao">—</div>
+        <div class="card-sub" id="convSub">—</div>
         <div class="card-icon">◎</div>
       </div>
       <div class="card yellow">
-        <div class="card-label">Em aberto</div>
-        <div class="card-value money" id="totalAberto">R$ 0</div>
-        <div class="card-sub" id="countAberto">0 propostas</div>
+        <div class="card-label">Pipeline em aberto</div>
+        <div class="card-value sm" id="totalAberto">—</div>
+        <div class="card-sub" id="countAberto">—</div>
         <div class="card-icon">◷</div>
       </div>
       <div class="card red">
         <div class="card-label">Propostas perdidas</div>
-        <div class="card-value money" id="totalPerdido">R$ 0</div>
-        <div class="card-sub" id="countPerdido">0 propostas</div>
+        <div class="card-value sm" id="totalPerdido">—</div>
+        <div class="card-sub" id="countPerdido">—</div>
         <div class="card-icon">✕</div>
       </div>
     </div>
 
-    <!-- CHARTS ROW -->
-    <div class="charts-row">
+    <!-- CHARTS ROW 1 -->
+    <div class="charts-row" style="margin-top:12px">
       <div class="chart-card">
         <div class="chart-title">Distribuição por status</div>
         <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Receita por tipo de serviço</div>
-        <div class="chart-wrap"><canvas id="chartServico"></canvas></div>
+        <div class="chart-title">Conversão: Sim vs Não</div>
+        <div class="chart-wrap"><canvas id="chartConv"></canvas></div>
       </div>
     </div>
 
-    <!-- MONTHLY CHART -->
+    <!-- MENSAL -->
     <div class="chart-full">
       <div class="chart-title">Receita confirmada por mês</div>
       <div class="chart-wrap-wide"><canvas id="chartMensal"></canvas></div>
     </div>
 
-    <!-- TABLE -->
+    <!-- BI POR SERVIÇO -->
+    <div class="sec-title">BI por tipo de serviço</div>
+    <div id="svcGrid" class="svc-grid"></div>
+
+    <!-- CHARTS SERVIÇO -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Receita por tipo de serviço</div>
+        <div class="chart-wrap"><canvas id="chartServico"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Taxa de conversão por serviço (%)</div>
+        <div class="chart-wrap"><canvas id="chartConvServ"></canvas></div>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div class="sec-title">Todas as propostas</div>
     <div class="table-card">
       <div class="table-header">
-        <span class="table-title">Todas as propostas</span>
-        <span class="table-count" id="totalCount"></span>
+        <span class="table-title">Registros</span>
+        <span class="card-sub" id="totalCount">—</span>
       </div>
       <div style="overflow-x:auto">
         <table>
@@ -188,185 +226,248 @@ tr:hover td{background:#181614}
               <th>Valor</th>
               <th>Data</th>
               <th>Status</th>
+              <th>Converteu?</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
     </div>
-  </div><!-- /content -->
+
+  </div>
 </main>
 
 <script>
+// ── Auth ──────────────────────────────────────────────
+const PWD_HASH = '90ba3b726ab10bf09eaf2b3f4449421711094bd9c7246e6d29fcb106cf7486a3';
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPwd() {
+  const val = document.getElementById('pwdInput').value;
+  const h = await sha256(val);
+  if(h === PWD_HASH) {
+    document.getElementById('gate').style.display='none';
+    sessionStorage.setItem('ap_auth','1');
+    loadData();
+  } else {
+    document.getElementById('pwdErr').style.display='block';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+// Auto-unlock if already authenticated this session
+if(sessionStorage.getItem('ap_auth')==='1') document.getElementById('gate').style.display='none';
+else { document.getElementById('loading').style.display='none'; }
+
+// ── Config ──────────────────────────────────────────
 const _t   = [atob('cGF0TWJ5U1RkYjFBWTNoY0guMTQ1MDNlODRlODI5MDUyNjBkNTc2YzYwYjRhNTk2NzU0'), atob('Yzg1OTFkMGQzNGVjMzdmYjQxMzg0ZTgzNGJkNDZhYg==')].join('');
 const BASE = 'appmWjJHXwYihOkfZ';
 const TBL  = 'Or%C3%A7amentos';
 
-const fmtMoney = v => 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtDate  = d => { if(!d) return '—'; const [y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; };
-
-const COLORS = {
-  Fechado:    '#6aaf7e',
-  Perdido:    '#c0614e',
-  Enviado:    '#5b8db8',
-  Negociando: '#c9a030',
+// ── Helpers ──
+const fmtMoney = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate  = d => { if(!d) return '—'; const[y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; };
+const BADGE = s => {
+  const m={'Fechado':'fechado','Perdido':'perdido','Enviado':'enviado','Negociando':'negociando'};
+  return `<span class="badge badge-${m[s]||'enviado'}">${s||'—'}</span>`;
 };
+const STATUS_COLORS = {Fechado:'#6aaf7e',Perdido:'#c0614e',Enviado:'#5b8db8',Negociando:'#c9a030'};
+const CHART_CFG = {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a6e62',font:{family:'Montserrat',size:11},boxWidth:12}}}};
 
-let chartStatus, chartServico, chartMensal;
+let charts = {};
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
 async function fetchAll() {
   let records=[], offset=null;
-  const fields = ['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento'];
-  const fParams = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
+  const fields=['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento','Converteu?'];
+  const fp = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
   do {
-    const url = `https://api.airtable.com/v0/${BASE}/${TBL}?${fParams}${offset?'&offset='+offset:''}`;
-    const r = await fetch(url, {headers:{'Authorization':`Bearer ${_t}`}});
-    const d = await r.json();
-    records = records.concat(d.records||[]);
-    offset = d.offset||null;
+    const url=`https://api.airtable.com/v0/${BASE}/${TBL}?${fp}${offset?'&offset='+offset:''}`;
+    const r=await fetch(url,{headers:{'Authorization':`Bearer ${_t}`}});
+    const d=await r.json();
+    records=records.concat(d.records||[]);
+    offset=d.offset||null;
   } while(offset);
   return records;
 }
 
-function buildCharts(records) {
+function buildDashboard(records) {
   const f = r => r.fields;
 
-  // --- Métricas por status ---
-  const byStatus = {};
-  const valByStatus = {};
+  // ── Métricas globais ──
+  let ganho=0, perdido=0, aberto=0;
+  let nConv=0, nNaoConv=0, nSemResposta=0;
+  let nPerd=0, nAbert=0;
+
+  const byStatus={}, valByStatus={};
+
   records.forEach(r => {
-    const s = f(r)['Status']||'Sem status';
-    const v = f(r)['Valor do Orçamento']||0;
-    byStatus[s] = (byStatus[s]||0) + 1;
-    valByStatus[s] = (valByStatus[s]||0) + v;
+    const flds=f(r);
+    const status=flds['Status']||'';
+    const valor=flds['Valor do Orçamento']||0;
+    const conv=flds['Converteu?']||'';
+
+    byStatus[status]=(byStatus[status]||0)+1;
+    valByStatus[status]=(valByStatus[status]||0)+valor;
+
+    if(conv==='Sim') { nConv++; ganho+=valor; }
+    else if(conv==='Não') { nNaoConv++; perdido+=valor; }
+    else {
+      if(status==='Fechado') { ganho+=valor; nConv++; }
+      else if(status==='Perdido') { perdido+=valor; nNaoConv++; }
+      else { aberto+=valor; nSemResposta++; nAbert++; }
+    }
   });
 
-  const ganho   = valByStatus['Fechado']||0;
-  const perdido = valByStatus['Perdido']||0;
-  const aberto  = (valByStatus['Enviado']||0) + (valByStatus['Negociando']||0);
-  const nFech   = byStatus['Fechado']||0;
-  const nPerd   = byStatus['Perdido']||0;
-  const nAbert  = (byStatus['Enviado']||0) + (byStatus['Negociando']||0);
-  const total   = records.length;
-  const taxa    = total > 0 ? Math.round((nFech/total)*100) : 0;
+  const totalDecidido = nConv+nNaoConv;
+  const taxa = totalDecidido>0 ? Math.round((nConv/totalDecidido)*100) : 0;
+  nPerd = nNaoConv;
+  nAbert = records.filter(r=>!['Fechado','Perdido'].includes(f(r)['Status']||'')).length;
+  aberto = records.filter(r=>!['Fechado','Perdido'].includes(f(r)['Status']||'')).reduce((s,r)=>s+(f(r)['Valor do Orçamento']||0),0);
 
   document.getElementById('totalGanho').textContent    = fmtMoney(ganho);
-  document.getElementById('countFechado').textContent  = `${nFech} contrato${nFech!==1?'s':''} fechado${nFech!==1?'s':''}`;
+  document.getElementById('countConverteu').textContent= `${nConv} convertido${nConv!==1?'s':''} (campo Converteu?)`;
   document.getElementById('taxaConversao').textContent = taxa+'%';
-  document.getElementById('convSub').textContent       = `${nFech} de ${total} proposta${total!==1?'s':''}`;
+  document.getElementById('convSub').textContent       = `${nConv} de ${totalDecidido} decidido${totalDecidido!==1?'s':''}`;
   document.getElementById('totalAberto').textContent   = fmtMoney(aberto);
-  document.getElementById('countAberto').textContent   = `${nAbert} proposta${nAbert!==1?'s':''}`;
+  document.getElementById('countAberto').textContent   = `${nAbert} proposta${nAbert!==1?'s':''} em aberto`;
   document.getElementById('totalPerdido').textContent  = fmtMoney(perdido);
   document.getElementById('countPerdido').textContent  = `${nPerd} proposta${nPerd!==1?'s':''}`;
-  document.getElementById('totalCount').textContent    = `${total} registros`;
+  document.getElementById('totalCount').textContent    = `${records.length} registros`;
 
-  const chartCfg = {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ labels:{ color:'#7a6e62', font:{family:'Montserrat',size:11}, boxWidth:12 } } }
-  };
-
-  // --- Donut status ---
-  const statusLabels = Object.keys(byStatus);
-  if(chartStatus) chartStatus.destroy();
-  chartStatus = new Chart(document.getElementById('chartStatus'), {
+  // ── Chart: Status donut ──
+  destroyChart('status');
+  const sl=Object.keys(byStatus);
+  charts['status']=new Chart(document.getElementById('chartStatus'),{
     type:'doughnut',
-    data:{
-      labels: statusLabels,
-      datasets:[{ data: statusLabels.map(s=>byStatus[s]),
-        backgroundColor: statusLabels.map(s=>COLORS[s]||'#555'),
-        borderColor:'#141210', borderWidth:3 }]
-    },
-    options:{ ...chartCfg, cutout:'65%' }
+    data:{labels:sl,datasets:[{data:sl.map(s=>byStatus[s]),
+      backgroundColor:sl.map(s=>STATUS_COLORS[s]||'#555'),borderColor:'#141210',borderWidth:3}]},
+    options:{...CHART_CFG,cutout:'65%'}
   });
 
-  // --- Bar por serviço ---
-  const valByServ = {};
-  records.filter(r=>f(r)['Status']==='Fechado').forEach(r=>{
-    const s = f(r)['Tipo de Serviço']||'Outro';
-    valByServ[s] = (valByServ[s]||0) + (f(r)['Valor do Orçamento']||0);
+  // ── Chart: Conversão Sim/Não ──
+  destroyChart('conv');
+  charts['conv']=new Chart(document.getElementById('chartConv'),{
+    type:'doughnut',
+    data:{labels:['Converteu (Sim)','Não converteu','Em aberto'],
+      datasets:[{data:[nConv,nNaoConv,nSemResposta],
+        backgroundColor:['#6aaf7e','#c0614e','#5b8db8'],borderColor:'#141210',borderWidth:3}]},
+    options:{...CHART_CFG,cutout:'65%'}
   });
-  const servLabels = Object.keys(valByServ).sort((a,b)=>valByServ[b]-valByServ[a]);
-  if(chartServico) chartServico.destroy();
-  chartServico = new Chart(document.getElementById('chartServico'), {
+
+  // ── Chart: Mensal ──
+  const valByMonth={};
+  records.filter(r=>['Fechado'].includes(f(r)['Status'])||f(r)['Converteu?']==='Sim').forEach(r=>{
+    const d=f(r)['Data do Orçamento'];
+    if(!d) return;
+    const k=d.slice(0,7);
+    valByMonth[k]=(valByMonth[k]||0)+(f(r)['Valor do Orçamento']||0);
+  });
+  const months=Object.keys(valByMonth).sort();
+  const fmtM=m=>{const[y,mo]=m.split('-');const nm=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return nm[parseInt(mo)-1]+'/'+y.slice(2);};
+  destroyChart('mensal');
+  charts['mensal']=new Chart(document.getElementById('chartMensal'),{
     type:'bar',
-    data:{
-      labels: servLabels,
-      datasets:[{ data: servLabels.map(s=>valByServ[s]),
-        backgroundColor:'rgba(201,169,110,0.7)', borderColor:'#c9a96e',
-        borderWidth:1, borderRadius:2 }]
-    },
-    options:{ ...chartCfg,
-      plugins:{ ...chartCfg.plugins, legend:{display:false} },
-      scales:{
-        x:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}}, grid:{color:'#1e1c18'} },
-        y:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}, grid:{color:'#1e1c18'} }
-      }
-    }
+    data:{labels:months.map(fmtM),datasets:[{data:months.map(m=>valByMonth[m]),
+      backgroundColor:'rgba(106,175,126,0.65)',borderColor:'#6aaf7e',borderWidth:1,borderRadius:2}]},
+    options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
+      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}},grid:{color:'#1e1c18'}},
+               y:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
   });
 
-  // --- Line receita mensal ---
-  const valByMonth = {};
-  records.filter(r=>f(r)['Status']==='Fechado' && f(r)['Data do Orçamento']).forEach(r=>{
-    const d = f(r)['Data do Orçamento'];
-    const key = d.slice(0,7); // YYYY-MM
-    valByMonth[key] = (valByMonth[key]||0) + (f(r)['Valor do Orçamento']||0);
+  // ── BI por tipo de serviço ──
+  const svcMap={};
+  records.forEach(r=>{
+    const flds=f(r);
+    const svc=flds['Tipo de Serviço']||'Não informado';
+    const val=flds['Valor do Orçamento']||0;
+    const conv=flds['Converteu?']||'';
+    const status=flds['Status']||'';
+    if(!svcMap[svc]) svcMap[svc]={count:0,ganho:0,conv:0,naoConv:0};
+    svcMap[svc].count++;
+    if(conv==='Sim'||(conv===''&&status==='Fechado')){svcMap[svc].conv++;svcMap[svc].ganho+=val;}
+    else if(conv==='Não'||(conv===''&&status==='Perdido')){svcMap[svc].naoConv++;}
   });
-  const months = Object.keys(valByMonth).sort();
-  const fmtMonth = m => { const [y,mo]=m.split('-'); const nms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']; return nms[parseInt(mo)-1]+'/'+y.slice(2); };
-  if(chartMensal) chartMensal.destroy();
-  chartMensal = new Chart(document.getElementById('chartMensal'), {
+
+  const svcKeys=Object.keys(svcMap).sort((a,b)=>svcMap[b].ganho-svcMap[a].ganho);
+  const maxGanho=Math.max(...svcKeys.map(k=>svcMap[k].ganho),1);
+
+  document.getElementById('svcGrid').innerHTML=svcKeys.map(k=>{
+    const d=svcMap[k];
+    const decididos=d.conv+d.naoConv;
+    const txConv=decididos>0?Math.round((d.conv/decididos)*100):0;
+    const pct=Math.round((d.ganho/maxGanho)*100);
+    return `<div class="svc-card">
+      <div class="svc-name">${k}</div>
+      <div class="svc-row"><span class="svc-key">Propostas</span><span class="svc-val">${d.count}</span></div>
+      <div class="svc-row"><span class="svc-key">Convertidos</span><span class="svc-val" style="color:#6aaf7e">${d.conv}</span></div>
+      <div class="svc-row"><span class="svc-key">Taxa conv.</span><span class="svc-val">${txConv}%</span></div>
+      <div class="svc-row"><span class="svc-key">Receita</span><span class="svc-val" style="color:#c9a96e">${fmtMoney(d.ganho)}</span></div>
+      <div class="svc-row"><span class="svc-key">Ticket médio</span><span class="svc-val">${d.conv>0?fmtMoney(d.ganho/d.conv):'—'}</span></div>
+      <div class="svc-bar"><div class="svc-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // ── Chart: Receita por serviço ──
+  destroyChart('servico');
+  charts['servico']=new Chart(document.getElementById('chartServico'),{
     type:'bar',
-    data:{
-      labels: months.map(fmtMonth),
-      datasets:[{ data: months.map(m=>valByMonth[m]),
-        backgroundColor:'rgba(106,175,126,0.6)', borderColor:'#6aaf7e',
-        borderWidth:1, borderRadius:2 }]
-    },
-    options:{ ...chartCfg,
-      plugins:{ ...chartCfg.plugins, legend:{display:false} },
-      scales:{
-        x:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}}, grid:{color:'#1e1c18'} },
-        y:{ ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{color:'#1e1c18'} }
-      }
-    }
+    data:{labels:svcKeys,datasets:[{data:svcKeys.map(k=>svcMap[k].ganho),
+      backgroundColor:'rgba(201,169,110,0.7)',borderColor:'#c9a96e',borderWidth:1,borderRadius:2}]},
+    options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
+      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
+               y:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
   });
 
-  // --- Tabela ---
-  const sorted = [...records].sort((a,b)=>{
-    const da = f(a)['Data do Orçamento']||''; const db = f(b)['Data do Orçamento']||'';
-    return db.localeCompare(da);
+  // ── Chart: Conversão por serviço ──
+  destroyChart('convServ');
+  const convRates=svcKeys.map(k=>{const d=svcMap[k];const dc=d.conv+d.naoConv;return dc>0?Math.round((d.conv/dc)*100):0;});
+  charts['convServ']=new Chart(document.getElementById('chartConvServ'),{
+    type:'bar',
+    data:{labels:svcKeys,datasets:[{data:convRates,
+      backgroundColor:'rgba(106,175,126,0.65)',borderColor:'#6aaf7e',borderWidth:1,borderRadius:2}]},
+    options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
+      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
+               y:{max:100,ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>v+'%'},grid:{color:'#1e1c18'}}}}
   });
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = sorted.length ? sorted.map(r=>{
-    const flds = f(r);
-    const s = flds['Status']||'';
-    const badgeClass = s==='Fechado'?'badge-fechado':s==='Perdido'?'badge-perdido':s==='Negociando'?'badge-negociando':'badge-enviado';
+
+  // ── Tabela ──
+  const sorted=[...records].sort((a,b)=>((f(b)['Data do Orçamento']||'')).localeCompare(f(a)['Data do Orçamento']||''));
+  document.getElementById('tableBody').innerHTML=sorted.map(r=>{
+    const flds=f(r);
+    const conv=flds['Converteu?']||'';
+    const convHtml=conv==='Sim'?'<span class="conv-sim">✓ Sim</span>':conv==='Não'?'<span class="conv-nao">✕ Não</span>':'<span style="color:var(--muted)">—</span>';
     return `<tr>
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
       <td>${flds['Nome do Cliente']||'—'}</td>
       <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
       <td style="color:var(--gold)">${flds['Valor do Orçamento']?fmtMoney(flds['Valor do Orçamento']):'—'}</td>
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
-      <td><span class="badge ${badgeClass}">${s||'—'}</span></td>
+      <td>${BADGE(flds['Status']||'')}</td>
+      <td>${convHtml}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty">Nenhum registro encontrado</td></tr>';
+  }).join('');
 }
 
 async function loadData() {
+  if(sessionStorage.getItem('ap_auth')!=='1') return;
   document.getElementById('loading').style.display='block';
   document.getElementById('content').style.display='none';
   try {
-    const records = await fetchAll();
-    buildCharts(records);
+    const records=await fetchAll();
+    buildDashboard(records);
     document.getElementById('loading').style.display='none';
     document.getElementById('content').style.display='block';
   } catch(e) {
-    document.getElementById('loading').innerHTML = '<p style="color:var(--red)">Erro ao carregar dados. Verifique sua conexão.</p>';
+    document.getElementById('loading').innerHTML='<p style="color:var(--red)">Erro ao carregar. Tente novamente.</p>';
     console.error(e);
   }
 }
 
-loadData();
+if(sessionStorage.getItem('ap_auth')==='1') loadData();
+else document.getElementById('loading').style.display='none';
 </script>
 </body>
 </html>
