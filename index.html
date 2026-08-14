@@ -285,7 +285,7 @@ footer {
   </div>
 
   <div id="formWrap">
-    <form id="orcForm" novalidate>
+    <form id="orcForm" novalidate onsubmit="return false">
 
       <!-- SEÇÃO 1: CLIENTE -->
       <div class="section">
@@ -547,38 +547,38 @@ function gerarPDF(d) {
 }
 
 // ── Submit ──
-document.getElementById('orcForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+async function salvarOrcamento() {
   const btn = document.getElementById('submitBtn');
   const err = document.getElementById('errMsg');
+  const form = document.getElementById('orcForm');
 
-  // Validate required
-  const nome = e.target.nome.value.trim();
-  const tel  = e.target.telefone.value.trim();
-  const svc  = e.target.servico.value;
-  const val  = e.target.valor.value;
+  // Validação
+  const nome = form.nome.value.trim();
+  const tel  = form.telefone.value.trim();
+  const svc  = form.servico.value;
+  const val  = form.valor.value;
   if(!nome || !tel || !svc || !val) {
     err.textContent = 'Preencha os campos obrigatórios: Nome, Telefone, Tipo de Serviço e Valor.';
     err.style.display = 'block';
     return;
   }
 
+  // Captura dados ANTES de desabilitar o botão
+  const d = {
+    nome:        nome,
+    telefone:    tel,
+    email:       form.email.value.trim(),
+    servico:     svc,
+    valor:       parseFloat(val) || 0,
+    endereco:    form.endereco.value.trim(),
+    data_evento: form.data_evento.value,
+    hora_evento: form.hora_evento.value,
+    obs:         form.obs.value.trim(),
+  };
+
   btn.disabled = true;
   btn.textContent = 'Salvando…';
   err.style.display = 'none';
-
-  const fd = new FormData(e.target);
-  const d  = {
-    nome:        fd.get('nome').trim(),
-    telefone:    fd.get('telefone').trim(),
-    email:       fd.get('email').trim(),
-    servico:     fd.get('servico'),
-    valor:       parseFloat(fd.get('valor')) || 0,
-    endereco:    fd.get('endereco').trim(),
-    data_evento: fd.get('data_evento'),
-    hora_evento: fd.get('hora_evento'),
-    obs:         fd.get('obs').trim(),
-  };
 
   const _now = new Date();
   const _p = n => String(n).padStart(2,'0');
@@ -593,43 +593,41 @@ document.getElementById('orcForm').addEventListener('submit', async (e) => {
     'Status':             'Enviado',
     'Data do Orçamento':  _now.toISOString().split('T')[0],
   };
-  if(d.email)       fields['Email']               = d.email;
+  if(d.email)       fields['Email']                    = d.email;
   if(d.endereco)    fields['Endereço do Evento']  = d.endereco;
-  if(d.data_evento) fields['Data do Evento']      = d.data_evento;
-  if(d.hora_evento) fields['Hora do Evento']      = d.hora_evento;
-  if(d.obs)         fields['Observações']          = d.obs;
+  if(d.data_evento) fields['Data do Evento']           = d.data_evento;
+  if(d.hora_evento) fields['Hora do Evento']           = d.hora_evento;
+  if(d.obs)         fields['Observações']   = d.obs;
 
   try {
-    const res = await fetch(`https://api.airtable.com/v0/${BASE}/${TBL}`, {
-      method:'POST',
-      headers:{'Authorization':`Bearer ${_t}`,'Content-Type':'application/json'},
-      body: JSON.stringify({fields})
+    const res = await fetch('https://api.airtable.com/v0/' + BASE + '/' + TBL, {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + _t, 'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: fields})
     });
     if(!res.ok) {
       const errBody = await res.text();
-      let msg = 'Erro ao salvar. Tente novamente.';
-      try { const j = JSON.parse(errBody); msg = j.error?.message || j.message || msg; } catch(_){}
+      let msg = 'Erro ao salvar (HTTP ' + res.status + '). Tente novamente.';
+      try { const j = JSON.parse(errBody); msg = (j.error && j.error.message) || j.message || msg; } catch(ignore){}
       throw new Error(msg);
     }
-    // ✅ Registro salvo — mostrar sucesso ANTES de gerar o PDF
+    // ✅ Salvo — mostrar sucesso ANTES de gerar PDF
     document.getElementById('formWrap').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
+    // PDF em separado — falha não afeta o registro já salvo
+    try { gerarPDF(d); } catch(pdfEx) { console.error('PDF:', pdfEx); }
   } catch(ex) {
-    console.error(ex);
-    err.textContent = ex.message || 'Erro ao salvar. Verifique sua conexão e tente novamente.';
+    console.error('Erro save:', ex);
+    err.textContent = (ex && ex.message) ? ex.message : 'Erro ao salvar. Verifique sua conexão e tente novamente.';
     err.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Salvar orçamento e baixar PDF';
-    return; // Não gerar PDF se o save falhou
+    // Dados NÃO são perdidos — form continua preenchido
   }
+}
 
-  // Gerar PDF separadamente — falha no PDF não afeta o registro salvo
-  try {
-    gerarPDF(d);
-  } catch(pdfEx) {
-    console.error('Erro ao gerar PDF:', pdfEx);
-    // PDF falhou mas o registro já foi salvo — não mostrar erro crítico
-  }
+document.getElementById('submitBtn').addEventListener('click', function() {
+  salvarOrcamento();
 });
 
 function resetForm() {
