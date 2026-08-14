@@ -163,6 +163,14 @@ textarea { resize: none; height: 80px; min-height: 80px; }
 }
 
 
+/* ── Google Autocomplete dropdown ── */
+.pac-container { background:#1c1814 !important; border:1px solid var(--border) !important; border-top:none !important; font-family:'Montserrat',sans-serif !important; font-size:13px !important; box-shadow:0 8px 24px rgba(0,0,0,.6) !important; border-radius:0 0 2px 2px !important; }
+.pac-item { padding:10px 14px !important; color:var(--text) !important; border-top:1px solid var(--border) !important; cursor:pointer !important; line-height:1.4 !important; }
+.pac-item:hover, .pac-item-selected { background:#252018 !important; }
+.pac-item-query { color:var(--gold) !important; font-size:13px !important; }
+.pac-matched { color:var(--gold) !important; }
+.pac-icon { display:none !important; }
+
 /* ── SUBMIT ── */
 .submit-section { margin-top: 8px; }
 .btn-submit {
@@ -335,7 +343,7 @@ footer {
           <div class="addr-wrap">
             <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro, cidade" autocomplete="off"/>
           </div>
-          <p class="addr-hint" id="mapsHint">Rua, número, bairro e cidade</p>
+          <p class="addr-hint" id="mapsHint">Carregando sugestões de endereço…</p>
         </div>
 
         <div class="grid-2">
@@ -631,7 +639,44 @@ function resetForm() {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// Endereço: campo de texto livre (sem dependência externa)
+// ── Google Maps Places Autocomplete ──
+window.initMaps = function() {
+  try {
+    const input = document.getElementById('endereco');
+    const ac = new google.maps.places.Autocomplete(input, {
+      componentRestrictions: {country:'br'},
+      fields: ['formatted_address','name'],
+      types: ['establishment','geocode']
+    });
+    ac.addListener('place_changed', () => {
+      const p = ac.getPlace();
+      if(p.formatted_address) input.value = p.formatted_address;
+      else if(p.name) input.value = p.name;
+    });
+    document.getElementById('mapsHint').textContent = 'Digite para ver sugestões de endereço.';
+    document.getElementById('mapsHint').style.color = 'var(--muted)';
+  } catch(e) {
+    document.getElementById('mapsHint').textContent = 'Preencha o endereço manualmente.';
+    document.getElementById('mapsHint').style.color = 'var(--muted)';
+  }
+};
+
+window.gm_authFailure = function() {
+  document.getElementById('mapsHint').textContent = 'Preencha o endereço manualmente.';
+  document.getElementById('mapsHint').style.color = 'var(--muted)';
+};
+
+(function() {
+  const k = [atob('QUl6YVN5QXJqVldGZ3lVSFAtb0Y='), atob('cjhWckZTLTZveUhocXhkbUtxSQ==')].join('');
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${k}&libraries=places&callback=initMaps`;
+  s.async = true; s.defer = true;
+  s.onerror = function() {
+    document.getElementById('mapsHint').textContent = 'Preencha o endereço manualmente.';
+    document.getElementById('mapsHint').style.color = 'var(--muted)';
+  };
+  document.head.appendChild(s);
+})();
 </script>
 </body>
 </html>
