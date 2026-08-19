@@ -231,7 +231,7 @@ tr:hover td{background:#181614}
               <th>Data</th>
               <th>Status</th>
               <th>Converteu?</th>
-              <th>Contrato</th>
+              <th>Contrato PDF</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -286,7 +286,7 @@ function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts
 
 async function fetchAll() {
   let records=[], offset=null;
-  const fields=['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento','Converteu?','CPF','Endereço do Evento','Data do Evento','Hora do Evento','Horas de Duração'];
+  const fields=['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento','Converteu?','CPF','Endereço do Evento','Data do Evento','Hora do Evento','Horas de Duração','Contrato PDF'];
   const fp = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
   do {
     const url=`https://api.airtable.com/v0/${BASE}/${TBL}?${fp}${offset?'&offset='+offset:''}`;
@@ -444,17 +444,11 @@ function buildDashboard(records) {
     const flds=f(r);
     const conv=flds['Converteu?']||'';
     const convHtml=conv==='Sim'?'<span class="conv-sim">✓ Sim</span>':conv==='Não'?'<span class="conv-nao">✕ Não</span>':'<span style="color:var(--muted)">—</span>';
-    // Monta URL para contrato
-    const cp = new URLSearchParams();
-    if(flds['Nome do Cliente']) cp.set('nome', flds['Nome do Cliente']);
-    if(flds['CPF'])             cp.set('cpf',  flds['CPF']);
-    if(flds['Tipo de Serviço']) cp.set('servico', flds['Tipo de Serviço']);
-    if(flds['Data do Evento'])  cp.set('data', flds['Data do Evento']);
-    if(flds['Hora do Evento'])  cp.set('hora', flds['Hora do Evento']);
-    if(flds['Endereço do Evento']) cp.set('local', flds['Endereço do Evento']);
-    if(flds['Horas de Duração']) cp.set('horas', flds['Horas de Duração']);
-    if(flds['Valor do Orçamento']) cp.set('valor', flds['Valor do Orçamento']);
-    const contratoUrl = 'contrato.html?' + cp.toString();
+    // Botão contrato PDF (Airtable attachment)
+    const anexos = flds['Contrato PDF'];
+    const contratoHtml = (anexos && anexos.length > 0)
+      ? `<a class="btn-contrato" href="${anexos[0].url}" target="_blank" download="contrato.pdf">⬇ Baixar</a>`
+      : `<span style="color:var(--muted);font-size:11px">—</span>`;
     return `<tr>
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
       <td>${flds['Nome do Cliente']||'—'}</td>
@@ -463,7 +457,7 @@ function buildDashboard(records) {
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
       <td>${BADGE(flds['Status']||'')}</td>
       <td>${convHtml}</td>
-      <td><a class="btn-contrato" href="${contratoUrl}" target="_blank">Gerar</a></td>
+      <td>${contratoHtml}</td>
     </tr>`;
   }).join('');
 }
