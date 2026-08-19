@@ -304,9 +304,13 @@ footer {
             <input type="tel" name="telefone" placeholder="(00) 00000-0000" required/>
           </div>
           <div class="field">
-            <label>E-mail</label>
-            <input type="email" name="email" placeholder="email@exemplo.com"/>
+            <label>CPF</label>
+            <input type="text" name="cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="off"/>
           </div>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" name="email" placeholder="email@exemplo.com"/>
         </div>
       </div>
 
@@ -355,6 +359,10 @@ footer {
             <label>Hora do evento</label>
             <input type="time" name="hora_evento"/>
           </div>
+        </div>
+        <div class="field">
+          <label>Horas de duração</label>
+          <input type="number" name="horas_duracao" placeholder="Ex: 2" min="0.5" max="12" step="0.5"/>
         </div>
       </div>
 
@@ -565,15 +573,17 @@ async function salvarOrcamento() {
 
   // Captura dados ANTES de desabilitar o botão
   const d = {
-    nome:        nome,
-    telefone:    tel,
-    email:       form.email.value.trim(),
-    servico:     svc,
-    valor:       parseFloat(val) || 0,
-    endereco:    form.endereco.value.trim(),
-    data_evento: form.data_evento.value,
-    hora_evento: form.hora_evento.value,
-    obs:         form.obs.value.trim(),
+    nome:          nome,
+    telefone:      tel,
+    cpf:           form.cpf.value.trim(),
+    email:         form.email.value.trim(),
+    servico:       svc,
+    valor:         parseFloat(val) || 0,
+    endereco:      form.endereco.value.trim(),
+    data_evento:   form.data_evento.value,
+    hora_evento:   form.hora_evento.value,
+    horas_duracao: parseFloat(form.horas_duracao.value) || 0,
+    obs:           form.obs.value.trim(),
   };
 
   btn.disabled = true;
@@ -593,11 +603,13 @@ async function salvarOrcamento() {
     'Status':             'Enviado',
     'Data do Orçamento':  _now.toISOString().split('T')[0],
   };
-  if(d.email)       fields['Email']                    = d.email;
-  if(d.endereco)    fields['Endereço do Evento']  = d.endereco;
-  if(d.data_evento) fields['Data do Evento']           = d.data_evento;
-  if(d.hora_evento) fields['Hora do Evento']           = d.hora_evento;
-  if(d.obs)         fields['Observações']   = d.obs;
+  if(d.cpf)          fields['CPF']                  = d.cpf;
+  if(d.email)        fields['Email']                = d.email;
+  if(d.endereco)     fields['Endereço do Evento']   = d.endereco;
+  if(d.data_evento)  fields['Data do Evento']       = d.data_evento;
+  if(d.hora_evento)  fields['Hora do Evento']       = d.hora_evento;
+  if(d.horas_duracao) fields['Horas de Duração']   = d.horas_duracao;
+  if(d.obs)          fields['Observações']          = d.obs;
 
   try {
     const res = await fetch('https://api.airtable.com/v0/' + BASE + '/' + TBL, {
