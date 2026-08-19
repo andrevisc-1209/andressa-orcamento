@@ -366,10 +366,31 @@ footer {
         </div>
       </div>
 
-      <!-- SEÇÃO 3: DETALHES -->
+      <!-- SEÇÃO 3: CONTRATO -->
       <div class="section">
         <div class="section-header">
           <div class="step-num">3</div>
+          <span class="section-title">Contrato</span>
+        </div>
+        <div class="field">
+          <label>Uso de imagem pela fotógrafa</label>
+          <div style="display:flex;gap:24px;margin-top:8px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:300;cursor:pointer;color:var(--muted)">
+              <input type="radio" name="uso_imagem" value="Autoriza" style="accent-color:var(--gold);width:16px;height:16px"/>
+              Autorizar (portfólio e redes sociais)
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:300;cursor:pointer;color:var(--muted)">
+              <input type="radio" name="uso_imagem" value="Não autoriza" style="accent-color:var(--gold);width:16px;height:16px"/>
+              Não autorizar
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 4: DETALHES -->
+      <div class="section">
+        <div class="section-header">
+          <div class="step-num">4</div>
           <span class="section-title">Observações</span>
         </div>
         <div class="field">
@@ -572,6 +593,7 @@ async function salvarOrcamento() {
   }
 
   // Captura dados ANTES de desabilitar o botão
+  const usoImgEl = form.querySelector('input[name="uso_imagem"]:checked');
   const d = {
     nome:          nome,
     telefone:      tel,
@@ -583,6 +605,7 @@ async function salvarOrcamento() {
     data_evento:   form.data_evento.value,
     hora_evento:   form.hora_evento.value,
     horas_duracao: parseFloat(form.horas_duracao.value) || 0,
+    uso_imagem:    usoImgEl ? usoImgEl.value : '',
     obs:           form.obs.value.trim(),
   };
 
@@ -603,13 +626,14 @@ async function salvarOrcamento() {
     'Status':             'Enviado',
     'Data do Orçamento':  _now.toISOString().split('T')[0],
   };
-  if(d.cpf)          fields['CPF']                  = d.cpf;
-  if(d.email)        fields['Email']                = d.email;
-  if(d.endereco)     fields['Endereço do Evento']   = d.endereco;
-  if(d.data_evento)  fields['Data do Evento']       = d.data_evento;
-  if(d.hora_evento)  fields['Hora do Evento']       = d.hora_evento;
-  if(d.horas_duracao) fields['Horas de Duração']   = d.horas_duracao;
-  if(d.obs)          fields['Observações']          = d.obs;
+  if(d.cpf)           fields['CPF']                 = d.cpf;
+  if(d.email)         fields['Email']               = d.email;
+  if(d.endereco)      fields['Endereço do Evento']  = d.endereco;
+  if(d.data_evento)   fields['Data do Evento']      = d.data_evento;
+  if(d.hora_evento)   fields['Hora do Evento']      = d.hora_evento;
+  if(d.horas_duracao) fields['Horas de Duração']    = d.horas_duracao;
+  if(d.uso_imagem)    fields['Uso de Imagem']       = d.uso_imagem;
+  if(d.obs)           fields['Observações']         = d.obs;
 
   try {
     const res = await fetch('https://api.airtable.com/v0/' + BASE + '/' + TBL, {
@@ -623,19 +647,199 @@ async function salvarOrcamento() {
       try { const j = JSON.parse(errBody); msg = (j.error && j.error.message) || j.message || msg; } catch(ignore){}
       throw new Error(msg);
     }
-    // ✅ Salvo — mostrar sucesso ANTES de gerar PDF
+    const saved = await res.json();
+    const recordId = saved.id;
+
+    // ✅ Salvo — mostrar sucesso
     document.getElementById('formWrap').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
-    // PDF em separado — falha não afeta o registro já salvo
-    try { gerarPDF(d); } catch(pdfEx) { console.error('PDF:', pdfEx); }
+
+    // Gerar PDF do orçamento (download local)
+    try { gerarPDF(d); } catch(pdfEx) { console.error('PDF orçamento:', pdfEx); }
+
+    // Gerar e subir contrato PDF para o Airtable
+    try {
+      const contratoBlob = gerarContratoPDF(d);
+      await uploadContratoPDF(recordId, contratoBlob);
+    } catch(cEx) { console.error('Contrato PDF upload:', cEx); }
+
   } catch(ex) {
     console.error('Erro save:', ex);
     err.textContent = (ex && ex.message) ? ex.message : 'Erro ao salvar. Verifique sua conexão e tente novamente.';
     err.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Salvar orçamento e baixar PDF';
-    // Dados NÃO são perdidos — form continua preenchido
   }
+}
+
+// ── Upload contrato PDF → Airtable attachment ──
+const CONTRATO_FIELD_ID = 'fldNKEgBi9Tr7WEz5';
+
+async function uploadContratoPDF(recordId, blob) {
+  const fd = new FormData();
+  fd.append('file', blob, 'contrato.pdf');
+  fd.append('filename', 'contrato.pdf');
+  fd.append('contentType', 'application/pdf');
+  fd.append('fieldId', CONTRATO_FIELD_ID);
+  await fetch('https://content.airtable.com/v0/' + BASE + '/' + recordId + '/uploadAttachment', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + _t},
+    body: fd
+  });
+}
+
+// ── Gerar PDF do contrato completo ──
+function gerarContratoPDF(d) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const PW = 210, PH = 297;
+  const ML = 18, MR = 18, TW = PW - ML - MR;
+  let y = 20;
+
+  function checkPage(needed) {
+    if(y + needed > PH - 16) { doc.addPage(); y = 18; }
+  }
+
+  function line(text, fontSize, style, color, indent) {
+    indent = indent || 0;
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', style || 'normal');
+    doc.setTextColor(color || 30);
+    const lines = doc.splitTextToSize(text, TW - indent);
+    lines.forEach(ln => {
+      checkPage(fontSize * 0.42);
+      doc.text(ln, ML + indent, y);
+      y += fontSize * 0.42;
+    });
+  }
+
+  function spacer(h) { y += h || 3; }
+
+  function fmtD(v) {
+    if(!v) return '____/____/________';
+    const [yr,mo,dy]=v.split('-'); return dy+'/'+mo+'/'+yr;
+  }
+  function fmtH(v) {
+    if(!v) return '____h';
+    const [h,m]=v.split(':'); return m==='00'?h+'h':h+'h'+m;
+  }
+  function fmtR(v) {
+    return 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  const valor = d.valor || 0;
+  const sinal = valor / 2;
+  const horas = d.horas_duracao || '—';
+  const autoriza = d.uso_imagem === 'Autoriza';
+  const naoAut   = d.uso_imagem === 'Não autoriza';
+  const hoje = new Date();
+  const todayStr = String(hoje.getDate()).padStart(2,'0')+'/'+String(hoje.getMonth()+1).padStart(2,'0')+'/'+hoje.getFullYear();
+
+  // ── CABEÇALHO ──
+  doc.setFillColor(245, 242, 237);
+  doc.rect(0, 0, PW, 26, 'F');
+  line('CONTRATO DE PRESTAÇÃO DE SERVIÇOS FOTOGRÁFICOS', 13, 'bold', 30);
+  spacer(1);
+  line('Andressa Pimentel Fotografia  ·  Rio de Janeiro / RJ', 9, 'normal', 100);
+  spacer(6);
+  doc.setDrawColor(180, 155, 100);
+  doc.line(ML, y, PW - MR, y);
+  spacer(5);
+
+  // ── PARTES ──
+  doc.setFillColor(250, 248, 244);
+  doc.rect(ML - 2, y - 2, TW + 4, 18, 'F');
+  doc.setDrawColor(201, 169, 110);
+  doc.rect(ML - 2, y - 2, 2, 18, 'F');
+  line('CONTRATADA: Andressa Cristina Pimentel Alves, CPF 130.446.207-24, fotógrafa.', 9.5, 'normal', 30);
+  spacer(2);
+  line('CONTRATANTE: ' + d.nome + (d.cpf ? ', CPF ' + d.cpf : '') + '.', 9.5, 'normal', 30);
+  spacer(8);
+
+  // ── CLÁUSULAS ──
+  const cls = [
+    {n:'1. OBJETO', t: 'O presente contrato tem como objeto a prestação de serviços fotográficos do tipo ' + d.servico + ', a ser realizado no dia ' + fmtD(d.data_evento) + ', no local ' + (d.endereco||'—') + ', com início às ' + fmtH(d.hora_evento) + ', com duração aproximada de ' + horas + ' hora' + (horas !== 1 ? 's' : '') + ' de acompanhamento.'},
+    {n:'2. FORMA DE PAGAMENTO', t: 'O valor total do serviço é de ' + fmtR(valor) + '. O pagamento será realizado via PIX (chave CPF: 130.446.207-24), da seguinte forma:\n• 50% (' + fmtR(sinal) + ') no ato da reserva (sinal);\n• 50% (' + fmtR(sinal) + ') no dia da realização do ensaio/evento.\nA data só será considerada reservada mediante pagamento do sinal.'},
+    {n:'3. ENTREGA DAS FOTOS', t: 'A CONTRATADA realizará a entrega de todas as fotos tratadas, em formato digital, através de galeria online. Serão entregues no mínimo 40 e no máximo 120 fotos, podendo este número ser ultrapassado a critério da CONTRATADA. Prazo: até 15 dias úteis após a realização do serviço. O link será enviado ao WhatsApp ou e-mail da CONTRATANTE. A galeria ficará disponível por 90 dias. Não estão inclusos álbuns impressos ou materiais físicos.'},
+    {n:'4. DIREITOS AUTORAIS E USO DE IMAGEM', t: null, usoImg: true},
+    {n:'5. CANCELAMENTO E REMARCAÇÃO', t: 'Em caso de cancelamento, o sinal não será reembolsado. Remarcação permitida por: doença (atestado médico) ou condições climáticas (ensaios externos). A CONTRATANTE deverá sugerir até 3 novas datas. Prazo máximo para remarcação: 45 dias após a data original, sem possibilidade de reembolso após este período.'},
+    {n:'6. DIREITO DE ARREPENDIMENTO', t: 'Nos termos do Código de Defesa do Consumidor, a CONTRATANTE poderá exercer o direito de arrependimento em até 7 dias corridos após a contratação, quando realizada fora do estabelecimento comercial.'},
+    {n:'7. ATRASOS', t: 'Tolerado atraso de até 20 minutos. Após esse período, o tempo de ensaio/cobertura poderá ser reduzido proporcionalmente, sem extensão do horário final ou compensação.'},
+    {n:'8. BACKUP E SEGURANÇA DAS IMAGENS', t: 'A CONTRATADA manterá backup por até 90 dias após a entrega. Após esse prazo, é responsabilidade da CONTRATANTE realizar o download e armazenamento adequado das fotos.'},
+    {n:'9. PADRÃO ARTÍSTICO E EDIÇÃO', t: 'A CONTRATANTE declara conhecer e concordar com o estilo fotográfico e de edição da CONTRATADA, não cabendo solicitação de alterações que descaracterizem o trabalho autoral.'},
+    {n:'10. SELEÇÃO E CURADORIA', t: 'As imagens passam por seleção e curadoria, sendo descartadas fotos com falhas técnicas, repetidas ou fora do padrão de qualidade da CONTRATADA.'},
+    {n:'11. REGISTRO DE MOMENTOS', t: 'A CONTRATADA não garante o registro de momentos ou pessoas específicas, sendo responsabilidade da CONTRATANTE sinalizar previamente ou durante o evento.'},
+    {n:'12. CONDIÇÕES DO AMBIENTE', t: 'A CONTRATADA não se responsabiliza por limitações técnicas decorrentes de iluminação inadequada, condições climáticas ou estrutura do local.'},
+    {n:'13. ARQUIVOS BRUTOS (RAW)', t: 'Os arquivos brutos (RAW) não serão disponibilizados ao cliente.'},
+    {n:'14. IMPREVISTOS E SUBSTITUIÇÃO', t: 'Em caso de impossibilidade da CONTRATADA por motivo de força maior, esta poderá indicar outro profissional com padrão semelhante ou realizar o reembolso integral dos valores pagos.'},
+    {n:'15. RESPONSABILIDADES', t: 'Em casos de fatores externos como clima, problemas técnicos ou situações imprevistas, ambas as partes buscarão a melhor solução em comum acordo.'},
+    {n:'16. ASSINATURA DIGITAL', t: 'As partes concordam que este contrato poderá ser assinado eletronicamente, inclusive por meio da plataforma Gov.br, sendo considerado válido e com a mesma força jurídica de uma assinatura física.'},
+    {n:'17. FORO', t: 'Fica eleito o foro da comarca de Rio de Janeiro/RJ para dirimir quaisquer dúvidas oriundas deste contrato.'},
+    {n:'18. DISPOSIÇÕES GERAIS', t: 'Este contrato passa a ter validade a partir do pagamento do sinal.'},
+  ];
+
+  cls.forEach(cl => {
+    checkPage(10);
+    line(cl.n, 9, 'bold', 30);
+    spacer(1);
+    if(cl.usoImg) {
+      line('A CONTRATANTE declara estar ciente e optar por:', 9, 'normal', 60);
+      spacer(2);
+      // checkbox 1
+      doc.setDrawColor(60); doc.setLineWidth(0.4);
+      doc.rect(ML, y - 3, 3.5, 3.5);
+      if(autoriza) { doc.setFillColor(30); doc.rect(ML, y - 3, 3.5, 3.5, 'F'); doc.setTextColor(255); doc.setFontSize(7); doc.text('✓', ML + 0.5, y - 0.2); doc.setTextColor(30); }
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      const l1 = doc.splitTextToSize('AUTORIZAR o uso das imagens para portfólio, redes sociais e materiais promocionais.', TW - 6);
+      l1.forEach(ln => { doc.text(ln, ML + 5, y); y += 3.8; });
+      spacer(1);
+      doc.setDrawColor(60);
+      doc.rect(ML, y - 3, 3.5, 3.5);
+      if(naoAut) { doc.setFillColor(30); doc.rect(ML, y - 3, 3.5, 3.5, 'F'); doc.setTextColor(255); doc.setFontSize(7); doc.text('✓', ML + 0.5, y - 0.2); doc.setTextColor(30); }
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      const l2 = doc.splitTextToSize('NÃO AUTORIZAR o uso das imagens para divulgação.', TW - 6);
+      l2.forEach(ln => { doc.text(ln, ML + 5, y); y += 3.8; });
+      spacer(2);
+      line('A CONTRATANTE pode usar as imagens livremente para fins pessoais, sendo vedado o uso comercial sem autorização prévia da CONTRATADA.', 9, 'normal', 60);
+    } else {
+      // Multi-linha com bullet
+      const parts = (cl.t||'').split('\n');
+      parts.forEach(p => {
+        if(p.startsWith('•')) {
+          doc.text('•', ML + 3, y);
+          const txt = doc.splitTextToSize(p.slice(1).trim(), TW - 8);
+          txt.forEach(ln => { checkPage(4); doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(60); doc.text(ln, ML + 7, y); y += 3.8; });
+        } else {
+          line(p, 9, 'normal', 60);
+        }
+      });
+    }
+    spacer(4);
+  });
+
+  // ── LOCAL E DATA ──
+  spacer(4);
+  checkPage(30);
+  doc.setDrawColor(200); doc.line(ML, y, PW - MR, y); spacer(4);
+  line('Rio de Janeiro, ' + todayStr, 9, 'normal', 80);
+  spacer(12);
+
+  // ── ASSINATURAS ──
+  const midX = PW / 2;
+  doc.setDrawColor(80); doc.setLineWidth(0.3);
+  doc.line(ML, y, midX - 5, y);
+  doc.line(midX + 5, y, PW - MR, y);
+  spacer(3);
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30);
+  doc.text(d.nome || 'CONTRATANTE', ML, y);
+  doc.text('Andressa Cristina Pimentel Alves', midX + 5, y);
+  spacer(3.5);
+  doc.setFont('helvetica','normal'); doc.setTextColor(100);
+  doc.setFontSize(8);
+  doc.text('CONTRATANTE' + (d.cpf ? ' · CPF ' + d.cpf : ''), ML, y);
+  doc.text('CONTRATADA · CPF 130.446.207-24', midX + 5, y);
+
+  return doc.output('blob');
 }
 
 document.getElementById('submitBtn').addEventListener('click', function() {
