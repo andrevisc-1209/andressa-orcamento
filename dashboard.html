@@ -694,18 +694,37 @@ async function buscarUrlContrato(recordId) {
 // ── UPLOAD CONTRATO PDF → AIRTABLE ──
 const CONTRATO_FIELD_ID = 'fldNKEgBi9Tr7WEz5';
 
+const TABLE_ID = 'tblFCXBxKgHoeMdfK';
+
 async function uploadContratoPDF(recordId, blob) {
   const fd = new FormData();
   fd.append('file', blob, 'contrato.pdf');
   fd.append('filename', 'contrato.pdf');
   fd.append('contentType', 'application/pdf');
   fd.append('fieldId', CONTRATO_FIELD_ID);
-  const r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + recordId + '/uploadAttachment', {
+  // Tenta com table ID no path (formato mais recente da API)
+  let r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + TABLE_ID + '/' + recordId + '/uploadAttachment', {
     method: 'POST',
     headers: {'Authorization': 'Bearer ' + _t},
     body: fd
   });
-  if(!r.ok) throw new Error('Upload falhou: ' + r.status);
+  // Fallback: sem table ID (formato antigo)
+  if(r.status === 404) {
+    const fd2 = new FormData();
+    fd2.append('file', blob, 'contrato.pdf');
+    fd2.append('filename', 'contrato.pdf');
+    fd2.append('contentType', 'application/pdf');
+    fd2.append('fieldId', CONTRATO_FIELD_ID);
+    r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + recordId + '/uploadAttachment', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + _t},
+      body: fd2
+    });
+  }
+  if(!r.ok) {
+    const body = await r.text().catch(()=>'');
+    throw new Error('Upload falhou (' + r.status + '): ' + body.slice(0,200));
+  }
 }
 
 // ── GERAR PDF DO CONTRATO COMPLETO ──
