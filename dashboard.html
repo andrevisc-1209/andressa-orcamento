@@ -260,7 +260,7 @@ tr:hover td{background:#181614}
               <th>Data</th>
               <th>Status</th>
               <th>Converteu?</th>
-              <th>Contrato PDF</th>
+              <th>Contrato</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -386,7 +386,7 @@ function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts
 
 async function fetchAll() {
   let records=[], offset=null;
-  const fields=['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento','Converteu?','CPF','Endereço do Evento','Data do Evento','Hora do Evento','Horas de Duração','Contrato PDF'];
+  const fields=['ID','Nome do Cliente','Tipo de Serviço','Valor do Orçamento','Status','Data do Orçamento','Converteu?','CPF','Endereço do Evento','Data do Evento','Hora do Evento','Horas de Duração','Data do Contrato'];
   const fp = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
   do {
     const url=`https://api.airtable.com/v0/${BASE}/${TBL}?${fp}${offset?'&offset='+offset:''}`;
@@ -546,9 +546,9 @@ function buildDashboard(records) {
     window._recMap[r.id] = {id: r.id, fields: flds};
     const conv=flds['Converteu?']||'';
     const convHtml=conv==='Sim'?'<span class="conv-sim">✓ Sim</span>':conv==='Não'?'<span class="conv-nao">✕ Não</span>':'<span style="color:var(--muted)">—</span>';
-    const anexos = flds['Contrato PDF'];
-    const contratoHtml = (anexos && anexos.length > 0)
-      ? `<a class="btn-contrato" href="${anexos[0].url}" target="_blank">⬇ Baixar</a>`
+    const dataContrato = flds['Data do Contrato'];
+    const contratoHtml = dataContrato
+      ? `<span style="color:var(--green);font-size:11px">&#10003; ${fmtDate(dataContrato)}</span>&nbsp;<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Regerar</button>`
       : `<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Gerar contrato</button>`;
     return `<tr id="row-${r.id}">
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
@@ -646,9 +646,10 @@ async function gerarESubirContrato() {
   btn.disabled = true;
   btn.textContent = 'Gerando PDF…';
 
-  let blob;
+  // 1. Gerar PDF (retorna o objeto doc, não um blob)
+  let pdfDoc;
   try {
-    blob = gerarContratoPDF(d);
+    pdfDoc = gerarContratoPDF(d);
   } catch(pdfEx) {
     console.error('PDF:', pdfEx);
     errEl.textContent = 'Erro ao gerar o PDF: ' + (pdfEx.message || pdfEx);
@@ -658,74 +659,38 @@ async function gerarESubirContrato() {
     return;
   }
 
+  // 2. Baixar PDF no dispositivo
+  const nomeArq = 'contrato-' + (d.nome||'cliente').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-').toLowerCase() + '.pdf';
+  pdfDoc.save(nomeArq);
+
+  // 3. Registrar data no Airtable via PATCH simples
+  btn.textContent = 'Registrando no Airtable...';
+  const hoje = new Date().toISOString().split('T')[0];
   try {
-    btn.textContent = 'Salvando no Airtable…';
-    await uploadContratoPDF(_currentRecordId, blob);
-  } catch(upEx) {
-    console.error('Upload:', upEx);
-    errEl.textContent = 'PDF gerado mas erro ao salvar no Airtable: ' + (upEx.message || upEx);
-    errEl.style.display = 'inline';
-    btn.disabled = false;
-    btn.textContent = 'Gerar e salvar contrato PDF';
-    return;
+    const pr = await fetch('https://api.airtable.com/v0/' + BASE + '/' + TABLE_ID + '/' + _currentRecordId, {
+      method: 'PATCH',
+      headers: {'Authorization': 'Bearer ' + _t, 'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: {'Data do Contrato': hoje}})
+    });
+    if(!pr.ok) console.warn('PATCH status:', pr.status);
+  } catch(pEx) { console.error('PATCH:', pEx); }
+
+  // 4. Atualizar célula da tabela
+  const rid = _currentRecordId;
+  const tdEl = document.getElementById('ctd-' + rid);
+  if(tdEl) {
+    const dtFmt = hoje.split('-').reverse().join('/');
+    tdEl.innerHTML = '<span style="color:var(--green);font-size:11px">&#10003; ' + dtFmt + '</span>&nbsp;<button class="btn-contrato" onclick="abrirModalContrato(\'' + rid + '\')">Regerar</button>';
   }
 
-  // Atualiza o botão da linha sem recarregar tudo
-  const url = await buscarUrlContrato(_currentRecordId);
-  const tdEl = document.getElementById('ctd-' + _currentRecordId);
-  if(tdEl && url) tdEl.innerHTML = `<a class="btn-contrato" href="${url}" target="_blank">&#11015; Baixar</a>`;
-
+  okEl.textContent = 'PDF baixado com sucesso!';
   okEl.style.display = 'inline';
   btn.textContent = 'Gerar e salvar contrato PDF';
   btn.disabled = false;
-  setTimeout(fecharModal, 1500);
+  setTimeout(fecharModal, 1800);
 }
 
-async function buscarUrlContrato(recordId) {
-  try {
-    const url = 'https://api.airtable.com/v0/' + BASE + '/' + TBL + '/' + recordId + '?fields%5B%5D=Contrato%20PDF';
-    const r = await fetch(url, {headers:{'Authorization':'Bearer ' + _t}});
-    const j = await r.json();
-    const at = j.fields && j.fields['Contrato PDF'];
-    return (at && at.length > 0) ? at[0].url : null;
-  } catch(e) { return null; }
-}
-
-// ── UPLOAD CONTRATO PDF → AIRTABLE ──
-const CONTRATO_FIELD_ID = 'fldNKEgBi9Tr7WEz5';
-
-const TABLE_ID = 'tblFCXBxKgHoeMdfK';
-
-async function uploadContratoPDF(recordId, blob) {
-  const fd = new FormData();
-  fd.append('file', blob, 'contrato.pdf');
-  fd.append('filename', 'contrato.pdf');
-  fd.append('contentType', 'application/pdf');
-  fd.append('fieldId', CONTRATO_FIELD_ID);
-  // Tenta com table ID no path (formato mais recente da API)
-  let r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + TABLE_ID + '/' + recordId + '/uploadAttachment', {
-    method: 'POST',
-    headers: {'Authorization': 'Bearer ' + _t},
-    body: fd
-  });
-  // Fallback: sem table ID (formato antigo)
-  if(r.status === 404) {
-    const fd2 = new FormData();
-    fd2.append('file', blob, 'contrato.pdf');
-    fd2.append('filename', 'contrato.pdf');
-    fd2.append('contentType', 'application/pdf');
-    fd2.append('fieldId', CONTRATO_FIELD_ID);
-    r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + recordId + '/uploadAttachment', {
-      method: 'POST',
-      headers: {'Authorization': 'Bearer ' + _t},
-      body: fd2
-    });
-  }
-  if(!r.ok) {
-    const body = await r.text().catch(()=>'');
-    throw new Error('Upload falhou (' + r.status + '): ' + body.slice(0,200));
-  }
-}
+// TABLE_ID para PATCH de Data do Contrato
 
 // ── GERAR PDF DO CONTRATO COMPLETO ──
 function gerarContratoPDF(d) {
@@ -838,7 +803,7 @@ function gerarContratoPDF(d) {
   doc.setFont('helvetica','normal'); doc.setTextColor(100); doc.setFontSize(8);
   doc.text('CONTRATANTE'+(d.cpf?' - CPF '+d.cpf:''),ML,y); doc.text('CONTRATADA - CPF 130.446.207-24',midX+5,y);
 
-  return doc.output('blob');
+  return doc; // retorna o objeto doc para poder chamar doc.save()
 }
 </script>
 </body>
