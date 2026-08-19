@@ -286,7 +286,7 @@ tr:hover td{background:#181614}
         </div>
         <div class="m-field">
           <label>CPF do cliente</label>
-          <input id="c_cpf" type="text" placeholder="000.000.000-00" maxlength="14"/>
+          <input id="c_cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"/>
         </div>
       </div>
       <div class="m-grid-3">
@@ -343,6 +343,16 @@ tr:hover td{background:#181614}
 </div>
 
 <script>
+// ── CPF Mask ──────────────────────────────────────────
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'');
+  if(v.length > 11) v = v.slice(0,11);
+  v = v.replace(/^(\d{3})(\d)/,'$1.$2');
+  v = v.replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3');
+  v = v.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+  el.value = v;
+}
+
 // ── Auth ──────────────────────────────────────────────
 const PWD_HASH = '90ba3b726ab10bf09eaf2b3f4449421711094bd9c7246e6d29fcb106cf7486a3';
 async function sha256(msg) {
@@ -724,12 +734,22 @@ function gerarContratoPDF(d) {
   spacer(1); line('Andressa Pimentel Fotografia - Rio de Janeiro / RJ',9,'normal',100);
   spacer(6); doc.setDrawColor(180,155,100); doc.line(ML,y,PW-MR,y); spacer(5);
 
-  // Partes
-  doc.setFillColor(250,248,244); doc.rect(ML-2,y-2,TW+4,18,'F');
-  doc.setFillColor(201,169,110); doc.rect(ML-2,y-2,2,18,'F');
-  line('CONTRATADA: Andressa Cristina Pimentel Alves, CPF 130.446.207-24, fotografa.',9.5,'normal',30);
-  spacer(2); line('CONTRATANTE: '+sa(d.nome)+(d.cpf?', CPF '+d.cpf:'')+'.', 9.5,'normal',30);
-  spacer(5);
+  // Partes — caixa com borda dourada e accent lateral
+  const contratadaTxt = 'CONTRATADA: Andressa Cristina Pimentel Alves, CPF 130.446.207-24, fotografa.';
+  const contratanteTxt = 'CONTRATANTE: '+sa(d.nome)+(d.cpf?', CPF '+d.cpf:'')+'.';
+  doc.setFontSize(9.5);
+  const lnA = doc.splitTextToSize(contratadaTxt, TW-8).length;
+  const lnC = doc.splitTextToSize(contratanteTxt, TW-8).length;
+  const boxH = (lnA + lnC) * 9.5*0.42 + 2 + 8; // linhas + spacer(2) + padding top+bottom
+  const yBox = y - 3;
+  doc.setFillColor(250,247,242); doc.rect(ML-2, yBox, TW+4, boxH, 'F');
+  doc.setDrawColor(201,169,110); doc.setLineWidth(0.5); doc.rect(ML-2, yBox, TW+4, boxH, 'S');
+  doc.setFillColor(201,169,110); doc.rect(ML-2, yBox, 3.5, boxH, 'F');
+  y = yBox + 4; // padding top dentro da caixa
+  line(contratadaTxt, 9.5, 'normal', 30, 5);
+  spacer(2);
+  line(contratanteTxt, 9.5, 'normal', 30, 5);
+  y = yBox + boxH + 5; // posição após o box + margem
 
   // Remove acentos para compatibilidade com fontes padrao do jsPDF
   function sa(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,''); }
