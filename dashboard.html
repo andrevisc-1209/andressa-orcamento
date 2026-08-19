@@ -690,7 +690,7 @@ async function gerarESubirContrato() {
   setTimeout(fecharModal, 1800);
 }
 
-// TABLE_ID para PATCH de Data do Contrato
+const TABLE_ID = 'tblFCXBxKgHoeMdfK'; // PATCH de Data do Contrato
 
 // ── GERAR PDF DO CONTRATO COMPLETO ──
 function gerarContratoPDF(d) {
@@ -729,7 +729,7 @@ function gerarContratoPDF(d) {
   doc.setFillColor(201,169,110); doc.rect(ML-2,y-2,2,18,'F');
   line('CONTRATADA: Andressa Cristina Pimentel Alves, CPF 130.446.207-24, fotografa.',9.5,'normal',30);
   spacer(2); line('CONTRATANTE: '+sa(d.nome)+(d.cpf?', CPF '+d.cpf:'')+'.', 9.5,'normal',30);
-  spacer(8);
+  spacer(5);
 
   // Remove acentos para compatibilidade com fontes padrao do jsPDF
   function sa(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,''); }
@@ -786,15 +786,16 @@ function gerarContratoPDF(d) {
         } else { line(p,9,'normal',60); }
       });
     }
-    spacer(4);
+    spacer(2.5);
   });
 
   // Rodapé
-  spacer(4); checkPage(30);
+  spacer(5); checkPage(40);
   doc.setDrawColor(200); doc.line(ML,y,PW-MR,y); spacer(4);
-  line('Rio de Janeiro, '+todayStr,9,'normal',80); spacer(12);
+  line('Rio de Janeiro, '+todayStr,9,'normal',80); spacer(5);
 
   // Assinaturas
+  spacer(12); // espaço para assinar
   const midX=PW/2;
   doc.setDrawColor(80); doc.setLineWidth(0.3);
   doc.line(ML,y,midX-5,y); doc.line(midX+5,y,PW-MR,y); spacer(3);
