@@ -305,7 +305,7 @@ footer {
           </div>
           <div class="field">
             <label>CPF</label>
-            <input type="text" name="cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="off"/>
+            <input type="text" name="cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="off" oninput="maskCPF(this)"/>
           </div>
         </div>
         <div class="field">
@@ -427,6 +427,16 @@ footer {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 
 <script>
+// ── CPF Mask ──────────────────────────────────────────
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'');
+  if(v.length > 11) v = v.slice(0,11);
+  v = v.replace(/^(\d{3})(\d)/,'$1.$2');
+  v = v.replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3');
+  v = v.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+  el.value = v;
+}
+
 // ── Config ────────────────────────────────────────────
 const _t   = [atob('cGF0TWJ5U1RkYjFBWTNoY0guMTQ1MDNlODRlODI5MDUyNjBkNTc2YzYwYjRhNTk2NzU0'), atob('Yzg1OTFkMGQzNGVjMzdmYjQxMzg0ZTgzNGJkNDZhYg==')].join('');
 const BASE = 'appmWjJHXwYihOkfZ';
@@ -626,14 +636,14 @@ async function salvarOrcamento() {
     'Status':             'Enviado',
     'Data do Orçamento':  _now.toISOString().split('T')[0],
   };
-  if(d.cpf)           fields['CPF']                 = d.cpf;
-  if(d.email)         fields['Email']               = d.email;
-  if(d.endereco)      fields['Endereço do Evento']  = d.endereco;
-  if(d.data_evento)   fields['Data do Evento']      = d.data_evento;
-  if(d.hora_evento)   fields['Hora do Evento']      = d.hora_evento;
-  if(d.horas_duracao) fields['Horas de Duração']    = d.horas_duracao;
-  if(d.uso_imagem)    fields['Uso de Imagem']       = d.uso_imagem;
-  if(d.obs)           fields['Observações']         = d.obs;
+  fields['CPF']                = d.cpf || '';
+  if(d.email)        fields['Email']               = d.email;
+  if(d.endereco)     fields['Endereço do Evento']  = d.endereco;
+  if(d.data_evento)  fields['Data do Evento']      = d.data_evento;
+  if(d.hora_evento)  fields['Hora do Evento']      = d.hora_evento;
+  if(d.horas_duracao > 0) fields['Horas de Duração'] = d.horas_duracao;
+  if(d.uso_imagem)   fields['Uso de Imagem']       = d.uso_imagem;
+  if(d.obs)          fields['Observações']         = d.obs;
 
   try {
     const res = await fetch('https://api.airtable.com/v0/' + BASE + '/' + TBL, {
