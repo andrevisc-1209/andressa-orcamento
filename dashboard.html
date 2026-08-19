@@ -6,6 +6,7 @@
 <title>Andressa Pimentel · Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 <style>
 :root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--text:#e8ddd0;--muted:#7a6e62;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -99,6 +100,35 @@ tr:hover td{background:#181614}
 .btn-contrato{padding:4px 12px;background:transparent;border:1px solid var(--gold-d);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
 .btn-contrato:hover{background:var(--gold);color:var(--bg)}
 
+/* MODAL */
+#modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+#modalOverlay.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:640px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-head{padding:24px 28px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--gold);letter-spacing:1px}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px;flex-shrink:0}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px 28px}
+.m-field{margin-bottom:18px}
+.m-field label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.m-field input,.m-field select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;padding:7px 0;outline:none;transition:border-color .2s}
+.m-field input:focus,.m-field select:focus{border-bottom-color:var(--gold)}
+.m-field input::placeholder{color:var(--muted)}
+.m-field select option{background:#1a1815}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.m-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.uso-row{display:flex;gap:24px;margin-top:6px}
+.uso-opt{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer}
+.uso-opt input[type=radio]{accent-color:var(--gold);width:15px;height:15px}
+.modal-foot{padding:16px 28px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn-gerar{padding:12px 28px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;flex-shrink:0}
+.btn-gerar:hover:not(:disabled){background:var(--gold);color:var(--bg)}
+.btn-gerar:disabled{opacity:.5;cursor:not-allowed}
+.btn-cancelar{padding:12px 20px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-cancelar:hover{border-color:var(--muted);color:var(--text)}
+.modal-err{font-size:11px;color:var(--red);display:none}
+.modal-ok{font-size:11px;color:var(--green);display:none}
+
 @media(max-width:900px){
   .cards{grid-template-columns:1fr 1fr}
   .svc-grid{grid-template-columns:1fr 1fr}
@@ -133,7 +163,6 @@ tr:hover td{background:#181614}
   <div class="nav-links">
     <a class="nav-link" href="index.html">Orçamento</a>
     <a class="nav-link active" href="dashboard.html">Dashboard</a>
-    <a class="nav-link" href="contrato.html">Contrato</a>
   </div>
   <button class="nav-refresh" onclick="loadData()">↻ Atualizar</button>
 </nav>
@@ -241,6 +270,77 @@ tr:hover td{background:#181614}
 
   </div>
 </main>
+
+<!-- MODAL CONTRATO -->
+<div id="modalOverlay" onclick="if(event.target===this)fecharModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Gerar Contrato</div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-grid">
+        <div class="m-field">
+          <label>Nome do cliente</label>
+          <input id="c_nome" type="text" placeholder="Nome completo"/>
+        </div>
+        <div class="m-field">
+          <label>CPF do cliente</label>
+          <input id="c_cpf" type="text" placeholder="000.000.000-00" maxlength="14"/>
+        </div>
+      </div>
+      <div class="m-grid-3">
+        <div class="m-field">
+          <label>Tipo de serviço</label>
+          <select id="c_servico">
+            <option value="">Selecione</option>
+            <option>Ensaio Gestante</option>
+            <option>Acompanhamento</option>
+            <option>Festa</option>
+            <option>Batizado</option>
+            <option>Festa Infantil</option>
+            <option>Parto</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Data do evento</label>
+          <input id="c_data" type="date"/>
+        </div>
+        <div class="m-field">
+          <label>Hora de início</label>
+          <input id="c_hora" type="time"/>
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Local do evento</label>
+        <input id="c_local" type="text" placeholder="Endereço completo"/>
+      </div>
+      <div class="m-grid">
+        <div class="m-field">
+          <label>Horas de duração</label>
+          <input id="c_horas" type="number" placeholder="Ex: 2" min="0.5" max="12" step="0.5"/>
+        </div>
+        <div class="m-field">
+          <label>Valor total (R$)</label>
+          <input id="c_valor" type="number" placeholder="0.00" min="0" step="0.01"/>
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Uso de imagem pela fotógrafa</label>
+        <div class="uso-row">
+          <label class="uso-opt"><input type="radio" name="c_uso" value="Autoriza"/> Autorizar (portfólio e redes)</label>
+          <label class="uso-opt"><input type="radio" name="c_uso" value="Não autoriza"/> Não autorizar</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-gerar" id="btnGerar" onclick="gerarESubirContrato()">Gerar e salvar contrato PDF</button>
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+      <span class="modal-err" id="modalErr"></span>
+      <span class="modal-ok" id="modalOk">✓ Contrato salvo!</span>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── Auth ──────────────────────────────────────────────
@@ -439,17 +539,18 @@ function buildDashboard(records) {
   });
 
   // ── Tabela ──
+  window._recMap = {};
   const sorted=[...records].sort((a,b)=>((f(b)['Data do Orçamento']||'')).localeCompare(f(a)['Data do Orçamento']||''));
   document.getElementById('tableBody').innerHTML=sorted.map(r=>{
     const flds=f(r);
+    window._recMap[r.id] = {id: r.id, fields: flds};
     const conv=flds['Converteu?']||'';
     const convHtml=conv==='Sim'?'<span class="conv-sim">✓ Sim</span>':conv==='Não'?'<span class="conv-nao">✕ Não</span>':'<span style="color:var(--muted)">—</span>';
-    // Botão contrato PDF (Airtable attachment)
     const anexos = flds['Contrato PDF'];
     const contratoHtml = (anexos && anexos.length > 0)
-      ? `<a class="btn-contrato" href="${anexos[0].url}" target="_blank" download="contrato.pdf">⬇ Baixar</a>`
-      : `<span style="color:var(--muted);font-size:11px">—</span>`;
-    return `<tr>
+      ? `<a class="btn-contrato" href="${anexos[0].url}" target="_blank">⬇ Baixar</a>`
+      : `<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Gerar contrato</button>`;
+    return `<tr id="row-${r.id}">
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
       <td>${flds['Nome do Cliente']||'—'}</td>
       <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
@@ -457,7 +558,7 @@ function buildDashboard(records) {
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
       <td>${BADGE(flds['Status']||'')}</td>
       <td>${convHtml}</td>
-      <td>${contratoHtml}</td>
+      <td id="ctd-${r.id}">${contratoHtml}</td>
     </tr>`;
   }).join('');
 }
@@ -479,6 +580,227 @@ async function loadData() {
 
 if(sessionStorage.getItem('ap_auth')==='1') loadData();
 else document.getElementById('loading').style.display='none';
+
+// ── MODAL ──────────────────────────────────────────────
+let _currentRecordId = null;
+
+function abrirModalContrato(recordId) {
+  _currentRecordId = recordId;
+  const rec = (window._recMap || {})[recordId];
+  const flds = rec ? rec.fields : {};
+
+  // Pré-preencher campos
+  document.getElementById('c_nome').value   = flds['Nome do Cliente'] || '';
+  document.getElementById('c_cpf').value    = flds['CPF'] || '';
+  document.getElementById('c_local').value  = flds['Endereço do Evento'] || '';
+  document.getElementById('c_data').value   = flds['Data do Evento'] || '';
+  document.getElementById('c_hora').value   = flds['Hora do Evento'] || '';
+  document.getElementById('c_horas').value  = flds['Horas de Duração'] || '';
+  document.getElementById('c_valor').value  = flds['Valor do Orçamento'] || '';
+  // Serviço
+  const sel = document.getElementById('c_servico');
+  const svc = flds['Tipo de Serviço'] || '';
+  for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===svc){sel.selectedIndex=i;break;}}
+  // Uso de imagem
+  const uso = flds['Uso de Imagem'] || '';
+  document.querySelectorAll('input[name="c_uso"]').forEach(r=>{ r.checked = r.value === uso; });
+  // Reset msgs
+  document.getElementById('modalErr').style.display = 'none';
+  document.getElementById('modalOk').style.display  = 'none';
+  document.getElementById('btnGerar').disabled      = false;
+  document.getElementById('btnGerar').textContent   = 'Gerar e salvar contrato PDF';
+  document.getElementById('modalTitle').textContent = 'Gerar Contrato — ' + (flds['Nome do Cliente'] || '');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  _currentRecordId = null;
+}
+
+async function gerarESubirContrato() {
+  const btn = document.getElementById('btnGerar');
+  const errEl = document.getElementById('modalErr');
+  const okEl  = document.getElementById('modalOk');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  const d = {
+    nome:          document.getElementById('c_nome').value.trim(),
+    cpf:           document.getElementById('c_cpf').value.trim(),
+    servico:       document.getElementById('c_servico').value,
+    data_evento:   document.getElementById('c_data').value,
+    hora_evento:   document.getElementById('c_hora').value,
+    endereco:      document.getElementById('c_local').value.trim(),
+    horas_duracao: parseFloat(document.getElementById('c_horas').value) || 0,
+    valor:         parseFloat(document.getElementById('c_valor').value) || 0,
+    uso_imagem:    (document.querySelector('input[name="c_uso"]:checked') || {}).value || '',
+  };
+
+  if(!d.nome || !d.cpf || !d.servico || !d.data_evento || !d.hora_evento || !d.endereco || !d.horas_duracao || !d.valor) {
+    errEl.textContent = 'Preencha todos os campos antes de gerar.';
+    errEl.style.display = 'inline';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Gerando PDF…';
+
+  try {
+    const blob = gerarContratoPDF(d);
+    btn.textContent = 'Salvando no Airtable…';
+    await uploadContratoPDF(_currentRecordId, blob);
+
+    // Atualiza o botão da linha sem recarregar tudo
+    const url = await buscarUrlContrato(_currentRecordId);
+    const tdEl = document.getElementById('ctd-' + _currentRecordId);
+    if(tdEl && url) tdEl.innerHTML = `<a class="btn-contrato" href="${url}" target="_blank">⬇ Baixar</a>`;
+
+    okEl.style.display = 'inline';
+    btn.textContent = 'Gerar e salvar contrato PDF';
+    btn.disabled = false;
+    setTimeout(fecharModal, 1500);
+  } catch(ex) {
+    console.error(ex);
+    errEl.textContent = 'Erro ao gerar ou salvar. Tente novamente.';
+    errEl.style.display = 'inline';
+    btn.disabled = false;
+    btn.textContent = 'Gerar e salvar contrato PDF';
+  }
+}
+
+async function buscarUrlContrato(recordId) {
+  try {
+    const url = 'https://api.airtable.com/v0/' + BASE + '/' + TBL + '/' + recordId + '?fields%5B%5D=Contrato%20PDF';
+    const r = await fetch(url, {headers:{'Authorization':'Bearer ' + _t}});
+    const j = await r.json();
+    const at = j.fields && j.fields['Contrato PDF'];
+    return (at && at.length > 0) ? at[0].url : null;
+  } catch(e) { return null; }
+}
+
+// ── UPLOAD CONTRATO PDF → AIRTABLE ──
+const CONTRATO_FIELD_ID = 'fldNKEgBi9Tr7WEz5';
+
+async function uploadContratoPDF(recordId, blob) {
+  const fd = new FormData();
+  fd.append('file', blob, 'contrato.pdf');
+  fd.append('filename', 'contrato.pdf');
+  fd.append('contentType', 'application/pdf');
+  fd.append('fieldId', CONTRATO_FIELD_ID);
+  const r = await fetch('https://content.airtable.com/v0/' + BASE + '/' + recordId + '/uploadAttachment', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + _t},
+    body: fd
+  });
+  if(!r.ok) throw new Error('Upload falhou: ' + r.status);
+}
+
+// ── GERAR PDF DO CONTRATO COMPLETO ──
+function gerarContratoPDF(d) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const PW = 210, PH = 297, ML = 18, MR = 18, TW = PW - ML - MR;
+  let y = 20;
+
+  function checkPage(need) { if(y + need > PH - 16){ doc.addPage(); y = 18; } }
+  function spacer(h){ y += h||3; }
+
+  function line(text, fs, style, grayVal, indent) {
+    indent = indent||0;
+    doc.setFontSize(fs); doc.setFont('helvetica', style||'normal'); doc.setTextColor(grayVal||30);
+    const lines = doc.splitTextToSize(text, TW - indent);
+    lines.forEach(ln => { checkPage(fs*0.42); doc.text(ln, ML+indent, y); y += fs*0.42; });
+  }
+
+  function fmtD(v){ if(!v)return '____/____/________'; const[yr,mo,dy]=v.split('-');return dy+'/'+mo+'/'+yr; }
+  function fmtH(v){ if(!v)return '____h'; const[h,m]=v.split(':');return m==='00'?h+'h':h+'h'+m; }
+  function fmtR(v){ return 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  const val=d.valor||0, sinal=val/2, horas=d.horas_duracao||'—';
+  const autoriza=d.uso_imagem==='Autoriza', naoAut=d.uso_imagem==='Não autoriza';
+  const hoje=new Date();
+  const todayStr=String(hoje.getDate()).padStart(2,'0')+'/'+String(hoje.getMonth()+1).padStart(2,'0')+'/'+hoje.getFullYear();
+
+  // Cabeçalho
+  doc.setFillColor(245,242,237); doc.rect(0,0,PW,26,'F');
+  line('CONTRATO DE PRESTAÇÃO DE SERVIÇOS FOTOGRÁFICOS',13,'bold',30);
+  spacer(1); line('Andressa Pimentel Fotografia  ·  Rio de Janeiro / RJ',9,'normal',100);
+  spacer(6); doc.setDrawColor(180,155,100); doc.line(ML,y,PW-MR,y); spacer(5);
+
+  // Partes
+  doc.setFillColor(250,248,244); doc.rect(ML-2,y-2,TW+4,18,'F');
+  doc.setFillColor(201,169,110); doc.rect(ML-2,y-2,2,18,'F');
+  line('CONTRATADA: Andressa Cristina Pimentel Alves, CPF 130.446.207-24, fotógrafa.',9.5,'normal',30);
+  spacer(2); line('CONTRATANTE: '+d.nome+(d.cpf?', CPF '+d.cpf:'')+'.', 9.5,'normal',30);
+  spacer(8);
+
+  const cls=[
+    {n:'1. OBJETO', t:'O presente contrato tem como objeto a prestação de serviços fotográficos do tipo '+d.servico+', a ser realizado no dia '+fmtD(d.data_evento)+', no local '+(d.endereco||'—')+', com início às '+fmtH(d.hora_evento)+', com duração aproximada de '+horas+' hora'+(horas!==1?'s':'')+' de acompanhamento.'},
+    {n:'2. FORMA DE PAGAMENTO', t:'O valor total do serviço é de '+fmtR(val)+'. Pagamento via PIX (CPF: 130.446.207-24):\n• 50% ('+fmtR(sinal)+') no ato da reserva (sinal);\n• 50% ('+fmtR(sinal)+') no dia da realização do ensaio/evento.\nA data só será considerada reservada mediante pagamento do sinal.'},
+    {n:'3. ENTREGA DAS FOTOS', t:'Entrega de todas as fotos tratadas em formato digital, via galeria online. Mínimo 40, máximo 120 fotos. Prazo: até 15 dias úteis. Galeria disponível por 90 dias. Não estão inclusos álbuns impressos ou materiais físicos.'},
+    {n:'4. DIREITOS AUTORAIS E USO DE IMAGEM', t:null, usoImg:true},
+    {n:'5. CANCELAMENTO E REMARCAÇÃO', t:'Em caso de cancelamento, o sinal não será reembolsado. Remarcação permitida por doença (atestado médico) ou condições climáticas (ensaios externos). A CONTRATANTE deverá sugerir até 3 novas datas. Prazo máximo: 45 dias após a data original.'},
+    {n:'6. DIREITO DE ARREPENDIMENTO', t:'Nos termos do CDC, a CONTRATANTE poderá exercer o direito de arrependimento em até 7 dias corridos após a contratação, quando realizada fora do estabelecimento comercial.'},
+    {n:'7. ATRASOS', t:'Tolerado atraso de até 20 minutos. Após esse período, o tempo de ensaio/cobertura poderá ser reduzido proporcionalmente, sem extensão do horário final ou compensação.'},
+    {n:'8. BACKUP E SEGURANÇA', t:'Backup das imagens por até 90 dias após a entrega. Após esse prazo, é responsabilidade da CONTRATANTE realizar o download e armazenamento adequado.'},
+    {n:'9. PADRÃO ARTÍSTICO', t:'A CONTRATANTE declara conhecer e concordar com o estilo fotográfico e de edição da CONTRATADA, não cabendo solicitação de alterações que descaracterizem o trabalho autoral.'},
+    {n:'10. SELEÇÃO E CURADORIA', t:'As imagens passam por seleção e curadoria, sendo descartadas fotos com falhas técnicas, repetidas ou fora do padrão de qualidade da CONTRATADA.'},
+    {n:'11. REGISTRO DE MOMENTOS', t:'A CONTRATADA não garante o registro de momentos ou pessoas específicas, sendo responsabilidade da CONTRATANTE sinalizar previamente ou durante o evento.'},
+    {n:'12. CONDIÇÕES DO AMBIENTE', t:'A CONTRATADA não se responsabiliza por limitações técnicas decorrentes de iluminação inadequada, condições climáticas ou estrutura do local.'},
+    {n:'13. ARQUIVOS BRUTOS (RAW)', t:'Os arquivos brutos (RAW) não serão disponibilizados ao cliente.'},
+    {n:'14. IMPREVISTOS', t:'Em caso de impossibilidade da CONTRATADA por força maior, esta poderá indicar outro profissional de padrão semelhante ou realizar o reembolso integral dos valores pagos.'},
+    {n:'15. RESPONSABILIDADES', t:'Em casos de fatores externos como clima, problemas técnicos ou situações imprevistas, ambas as partes buscarão a melhor solução em comum acordo.'},
+    {n:'16. ASSINATURA DIGITAL', t:'As partes concordam que este contrato poderá ser assinado eletronicamente, inclusive via plataforma Gov.br, com a mesma validade jurídica de uma assinatura física.'},
+    {n:'17. FORO', t:'Fica eleito o foro da comarca de Rio de Janeiro/RJ para dirimir quaisquer dúvidas oriundas deste contrato.'},
+    {n:'18. DISPOSIÇÕES GERAIS', t:'Este contrato passa a ter validade a partir do pagamento do sinal.'},
+  ];
+
+  cls.forEach(cl=>{
+    checkPage(10);
+    line(cl.n,9,'bold',30); spacer(1);
+    if(cl.usoImg){
+      line('A CONTRATANTE declara estar ciente e optar por:',9,'normal',60); spacer(2);
+      doc.setDrawColor(60); doc.setLineWidth(0.4);
+      doc.rect(ML,y-3,3.5,3.5);
+      if(autoriza){doc.setFillColor(30);doc.rect(ML,y-3,3.5,3.5,'F');doc.setFontSize(7);doc.setTextColor(255);doc.text('✓',ML+0.5,y-0.2);doc.setTextColor(30);}
+      doc.setFontSize(9);doc.setFont('helvetica','normal');
+      const l1=doc.splitTextToSize('AUTORIZAR o uso das imagens para portfólio, redes sociais e materiais promocionais.',TW-6);
+      l1.forEach(ln=>{doc.text(ln,ML+5,y);y+=3.8;}); spacer(1);
+      doc.setDrawColor(60); doc.rect(ML,y-3,3.5,3.5);
+      if(naoAut){doc.setFillColor(30);doc.rect(ML,y-3,3.5,3.5,'F');doc.setFontSize(7);doc.setTextColor(255);doc.text('✓',ML+0.5,y-0.2);doc.setTextColor(30);}
+      doc.setFontSize(9);doc.setFont('helvetica','normal');
+      const l2=doc.splitTextToSize('NÃO AUTORIZAR o uso das imagens para divulgação.',TW-6);
+      l2.forEach(ln=>{doc.text(ln,ML+5,y);y+=3.8;}); spacer(2);
+      line('A CONTRATANTE pode usar as imagens livremente para fins pessoais, vedado o uso comercial sem autorização prévia da CONTRATADA.',9,'normal',60);
+    } else {
+      (cl.t||'').split('\n').forEach(p=>{
+        if(p.startsWith('•')){
+          checkPage(4); doc.text('•',ML+3,y);
+          const txt=doc.splitTextToSize(p.slice(1).trim(),TW-8);
+          txt.forEach(ln=>{checkPage(4);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60);doc.text(ln,ML+7,y);y+=3.8;});
+        } else { line(p,9,'normal',60); }
+      });
+    }
+    spacer(4);
+  });
+
+  // Rodapé
+  spacer(4); checkPage(30);
+  doc.setDrawColor(200); doc.line(ML,y,PW-MR,y); spacer(4);
+  line('Rio de Janeiro, '+todayStr,9,'normal',80); spacer(12);
+
+  // Assinaturas
+  const midX=PW/2;
+  doc.setDrawColor(80); doc.setLineWidth(0.3);
+  doc.line(ML,y,midX-5,y); doc.line(midX+5,y,PW-MR,y); spacer(3);
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30);
+  doc.text(d.nome||'CONTRATANTE',ML,y); doc.text('Andressa Cristina Pimentel Alves',midX+5,y); spacer(3.5);
+  doc.setFont('helvetica','normal'); doc.setTextColor(100); doc.setFontSize(8);
+  doc.text('CONTRATANTE'+(d.cpf?' · CPF '+d.cpf:''),ML,y); doc.text('CONTRATADA · CPF 130.446.207-24',midX+5,y);
+
+  return doc.output('blob');
+}
 </script>
 </body>
 </html>
