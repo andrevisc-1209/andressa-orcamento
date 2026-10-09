@@ -46,8 +46,11 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 /* SECTION HEADER */
 .sec-title{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 
+/* AGENDA TOP (calendar + day panel) */
+.agenda-top{display:flex;flex-direction:column;gap:14px}
+
 /* CALENDAR */
-.cal-card{background:var(--surface);border:1px solid var(--border);padding:24px}
+.cal-card{background:var(--surface);border:1px solid var(--border);padding:24px;min-width:0}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
 .cal-nav-group{display:flex;align-items:center;gap:10px}
 .cal-month{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);letter-spacing:1px;min-width:190px;text-align:center}
@@ -72,7 +75,7 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .cal-count{position:absolute;bottom:6px;right:7px;font-size:10px;font-weight:600;color:var(--gold)}
 
 /* DAY PANEL */
-.day-panel{background:var(--surface);border:1px solid var(--border);padding:22px 26px;margin-top:14px}
+.day-panel{background:var(--surface);border:1px solid var(--border);padding:22px 26px;min-width:0}
 .day-panel-title{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .ev-item{display:flex;gap:18px;padding:13px 0;border-bottom:1px solid #1e1c18}
 .ev-item:last-child{border-bottom:none}
@@ -90,9 +93,11 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
 .card-sub{font-size:10px;color:var(--muted)}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;min-width:760px}
 th{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding:12px 18px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
-td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
+td{font-size:13px;padding:13px 18px;border-bottom:1px solid #1e1c18;vertical-align:middle;white-space:nowrap}
+th:nth-child(4),td:nth-child(4){white-space:normal}
+th:nth-child(5),td:nth-child(5){min-width:160px;white-space:normal}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#181614}
 .badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px}
@@ -101,16 +106,49 @@ tr:hover td{background:#181614}
 .badge-enviado{background:rgba(91,141,184,.15);color:#5b8db8}
 .badge-negociando{background:rgba(201,160,48,.15);color:#c9a030}
 
-@media(max-width:700px){
-  .cal-day{min-height:60px;padding:6px 5px}
-  .cal-month{font-size:17px;min-width:140px}
-  th:nth-child(5),td:nth-child(5){display:none}
+/* BOTTOM NAV (mobile only) */
+.bottom-nav{display:none}
+.bottom-nav-link{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;text-decoration:none;color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;min-height:54px}
+.bottom-nav-icon{font-size:18px;line-height:1}
+.bottom-nav-link.active{color:var(--gold)}
+
+/* ══════════ DESKTOP (≥1024px): calendário + painel lado a lado ══════════ */
+@media(min-width:1024px){
+  .agenda-top{display:grid;grid-template-columns:1.3fr 1fr;align-items:start;gap:16px}
+  .day-panel{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow-y:auto}
 }
-@media(max-width:480px){
-  nav{padding:0 16px}
-  .cal-day{min-height:48px}
+
+/* ══════════ TABLET (768–1023px) ══════════ */
+@media(max-width:1023px){
+  main{padding:24px 18px 60px}
+  .cal-day{min-height:68px;padding:7px 6px}
+  .table-card > div[style*="overflow-x"]{-webkit-overflow-scrolling:touch}
+}
+
+/* ══════════ MOBILE (<768px) ══════════ */
+@media(max-width:767px){
+  main{padding:20px 14px 84px}
+  nav{padding:0 16px;height:56px}
+  .nav-links{display:none}
+  .page-title h1{font-size:22px}
+  .cal-card,.day-panel{padding:16px}
+  .cal-day{min-height:50px;padding:5px 4px}
+  .cal-month{font-size:17px;min-width:140px}
   .cal-dots{display:none}
-  th:nth-child(4),td:nth-child(4){display:none}
+  .cal-today-btn{padding:9px 12px;min-height:40px}
+  .cal-btn{width:38px;height:38px}
+
+  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);z-index:150;padding-bottom:env(safe-area-inset-bottom)}
+
+  /* Table → stacked record cards */
+  .table-card table{min-width:0}
+  .table-card thead{display:none}
+  .table-card table,.table-card tbody,.table-card tr,.table-card td{display:block;width:100%}
+  .table-card tr{border:1px solid var(--border);border-radius:4px;margin:0 14px 12px}
+  .table-card td{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid #1e1c18;white-space:normal;text-align:right;min-width:0}
+  .table-card td::before{content:attr(data-label);font-size:9px;font-weight:500;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);text-align:left;flex-shrink:0}
+  .table-card td:last-child{border-bottom:none}
+  .table-card tr:last-child{margin-bottom:0}
 }
 </style>
 </head>
@@ -151,22 +189,24 @@ tr:hover td{background:#181614}
 
   <div id="content" style="display:none">
 
-    <div class="cal-card">
-      <div class="cal-nav">
-        <div class="cal-nav-group">
-          <button class="cal-btn" onclick="mesAnterior()">‹</button>
-          <div class="cal-month" id="calMonthLabel">—</div>
-          <button class="cal-btn" onclick="mesProximo()">›</button>
+    <div class="agenda-top">
+      <div class="cal-card">
+        <div class="cal-nav">
+          <div class="cal-nav-group">
+            <button class="cal-btn" onclick="mesAnterior()">‹</button>
+            <div class="cal-month" id="calMonthLabel">—</div>
+            <button class="cal-btn" onclick="mesProximo()">›</button>
+          </div>
+          <button class="cal-today-btn" onclick="hojeBtn()">Hoje</button>
         </div>
-        <button class="cal-today-btn" onclick="hojeBtn()">Hoje</button>
+        <div class="cal-grid" id="calHead"></div>
+        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="cal-grid" id="calHead"></div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
 
-    <div class="day-panel">
-      <div class="day-panel-title" id="dayPanelTitle">—</div>
-      <div id="dayPanelBody"></div>
+      <div class="day-panel">
+        <div class="day-panel-title" id="dayPanelTitle">—</div>
+        <div id="dayPanelBody"></div>
+      </div>
     </div>
 
     <div class="sec-title">Eventos do mês</div>
@@ -347,13 +387,13 @@ function renderMonthList(){
       ? `<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.local)}" target="_blank" rel="noopener" title="Abrir no Google Maps">🗺</a>`
       : '<span style="color:var(--muted)">—</span>';
     return `<tr>
-      <td style="color:var(--text)">${fmtDate(ev.data)}</td>
-      <td style="color:var(--gold)">${ev.hora||'—'}</td>
-      <td>${ev.tipo}</td>
-      <td>${ev.cliente}</td>
-      <td style="color:var(--muted)">${ev.local}</td>
-      <td>${BADGE(ev.status)}</td>
-      <td>${mapaHtml}</td>
+      <td data-label="Data" style="color:var(--text)">${fmtDate(ev.data)}</td>
+      <td data-label="Hora" style="color:var(--gold)">${ev.hora||'—'}</td>
+      <td data-label="Tipo de evento">${ev.tipo}</td>
+      <td data-label="Cliente">${ev.cliente}</td>
+      <td data-label="Local" style="color:var(--muted)">${ev.local}</td>
+      <td data-label="Status">${BADGE(ev.status)}</td>
+      <td data-label="Mapa">${mapaHtml}</td>
     </tr>`;
   }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum evento neste mês.</td></tr>`;
 }
@@ -380,5 +420,12 @@ async function loadData() {
 if(sessionStorage.getItem('ap_auth')==='1') loadData();
 else document.getElementById('loading').style.display='none';
 </script>
+
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <a class="bottom-nav-link" href="index.html"><span class="bottom-nav-icon">✎</span>Orçamento</a>
+  <a class="bottom-nav-link" href="dashboard.html"><span class="bottom-nav-icon">◎</span>Dashboard</a>
+  <a class="bottom-nav-link active" href="agenda.html"><span class="bottom-nav-icon">▦</span>Agenda</a>
+</div>
 </body>
 </html>

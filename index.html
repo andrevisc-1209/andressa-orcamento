@@ -282,25 +282,46 @@ footer {
 }
 
 
-/* ── MOBILE ── */
-@media (max-width: 480px) {
+/* ── TOP NAV ── */
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200}
+.topnav-logo{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:var(--gold)}
+.topnav-links{display:flex;gap:4px}
+.topnav-link{padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent}
+.topnav-link.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav{display:none}
+.bottom-nav-link{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;text-decoration:none;color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;min-height:54px}
+.bottom-nav-icon{font-size:18px;line-height:1}
+.bottom-nav-link.active{color:var(--gold)}
+
+/* ── TABLET (768–1023px) ── */
+@media (max-width: 1023px) {
+  main { padding: 36px 24px 70px; }
+}
+
+/* ── MOBILE (<768px) ── */
+@media (max-width: 767px) {
   .site-header img { height: 44px; }
-  main { padding: 28px 16px 60px; }
+  main { padding: 28px 16px 84px; }
   .section { padding: 20px 16px 16px; }
   .grid-2 { grid-template-columns: 1fr; gap: 0; }
   .page-title h1 { font-size: 22px; }
   input, select { font-size: 16px; } /* prevent zoom on iOS */
+  .topnav-links { display: none; }
+  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);z-index:250;padding-bottom:env(safe-area-inset-bottom)}
+  .btn-submit{min-height:54px}
 }
 </style>
 </head>
 <body>
 
-<nav style="background:#141210;border-bottom:1px solid #2e2820;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200">
-  <span style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:#c9a96e">Andressa Pimentel</span>
-  <div style="display:flex;gap:4px">
-    <a href="index.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c9a96e;text-decoration:none;border-bottom:2px solid #c9a96e">Orçamento</a>
-    <a href="dashboard.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9c8f82;text-decoration:none;border-bottom:2px solid transparent">Dashboard</a>
-    <a href="agenda.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9c8f82;text-decoration:none;border-bottom:2px solid transparent">Agenda</a>
+<nav class="topnav">
+  <span class="topnav-logo">Andressa Pimentel</span>
+  <div class="topnav-links">
+    <a href="index.html" class="topnav-link active">Orçamento</a>
+    <a href="dashboard.html" class="topnav-link">Dashboard</a>
+    <a href="agenda.html" class="topnav-link">Agenda</a>
   </div>
 </nav>
 <header class="site-header">
@@ -931,5 +952,12 @@ window.gm_authFailure = function() {
   document.head.appendChild(s);
 })();
 </script>
+
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <a class="bottom-nav-link active" href="index.html"><span class="bottom-nav-icon">✎</span>Orçamento</a>
+  <a class="bottom-nav-link" href="dashboard.html"><span class="bottom-nav-icon">◎</span>Dashboard</a>
+  <a class="bottom-nav-link" href="agenda.html"><span class="bottom-nav-icon">▦</span>Agenda</a>
+</div>
 </body>
 </html>
