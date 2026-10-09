@@ -106,8 +106,8 @@ tr:hover td{background:#181614}
 .btn-contrato:hover{background:var(--gold);color:var(--bg)}
 
 /* MODAL */
-#modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
-#modalOverlay.open{display:flex}
+#modalOverlay,#editModalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+#modalOverlay.open,#editModalOverlay.open{display:flex}
 .modal-box{background:var(--surface);border:1px solid var(--border);width:100%;max-width:640px;max-height:90vh;overflow-y:auto;position:relative}
 .modal-head{padding:24px 28px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:var(--gold);letter-spacing:1px}
@@ -269,6 +269,7 @@ tr:hover td{background:#181614}
               <th>Status</th>
               <th>Converteu?</th>
               <th>Contrato</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -346,6 +347,94 @@ tr:hover td{background:#181614}
       <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
       <span class="modal-err" id="modalErr"></span>
       <span class="modal-ok" id="modalOk">✓ Contrato salvo!</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PROPOSTA -->
+<div id="editModalOverlay" onclick="if(event.target===this)fecharModalEditar()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="editModalTitle">Editar Proposta</div>
+      <button class="modal-close" onclick="fecharModalEditar()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-grid">
+        <div class="m-field">
+          <label>Nome do cliente</label>
+          <input id="e_nome" type="text" placeholder="Nome completo"/>
+        </div>
+        <div class="m-field">
+          <label>CPF do cliente</label>
+          <input id="e_cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"/>
+        </div>
+      </div>
+      <div class="m-grid-3">
+        <div class="m-field">
+          <label>Tipo de serviço</label>
+          <select id="e_servico">
+            <option value="">Selecione</option>
+            <option>Ensaio Gestante</option>
+            <option>Acompanhamento</option>
+            <option>Festa</option>
+            <option>Batizado</option>
+            <option>Festa Infantil</option>
+            <option>Parto</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Status</label>
+          <select id="e_status">
+            <option value="">Selecione</option>
+            <option>Enviado</option>
+            <option>Negociando</option>
+            <option>Fechado</option>
+            <option>Perdido</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Converteu?</label>
+          <select id="e_conv">
+            <option value="">—</option>
+            <option value="Sim">Sim</option>
+            <option value="Não">Não</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-grid-3">
+        <div class="m-field">
+          <label>Data do orçamento</label>
+          <input id="e_data_orc" type="date"/>
+        </div>
+        <div class="m-field">
+          <label>Data do evento</label>
+          <input id="e_data_evento" type="date"/>
+        </div>
+        <div class="m-field">
+          <label>Hora do evento</label>
+          <input id="e_hora_evento" type="time"/>
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Local do evento</label>
+        <input id="e_local" type="text" placeholder="Endereço completo"/>
+      </div>
+      <div class="m-grid">
+        <div class="m-field">
+          <label>Horas de duração</label>
+          <input id="e_horas" type="number" placeholder="Ex: 2" min="0.5" max="12" step="0.5"/>
+        </div>
+        <div class="m-field">
+          <label>Valor do orçamento (R$)</label>
+          <input id="e_valor" type="number" placeholder="0.00" min="0" step="0.01"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-gerar" id="btnSalvarEdicao" onclick="salvarEdicao()">Salvar alterações</button>
+      <button class="btn-cancelar" onclick="fecharModalEditar()">Cancelar</button>
+      <span class="modal-err" id="editModalErr"></span>
+      <span class="modal-ok" id="editModalOk">✓ Alterações salvas!</span>
     </div>
   </div>
 </div>
@@ -588,6 +677,7 @@ function buildDashboard(records) {
       <td>${BADGE(flds['Status']||'')}</td>
       <td id="conv-${r.id}">${convHtml}</td>
       <td id="ctd-${r.id}">${contratoHtml}</td>
+      <td><button class="btn-contrato" onclick="abrirModalEditar('${r.id}')">✎ Editar</button></td>
     </tr>`;
   }).join('');
 }
@@ -629,6 +719,102 @@ async function atualizarConverteu(recordId, valor, selEl) {
     console.error(e);
     selEl.disabled = false;
     alert('Não foi possível salvar. Verifique sua conexão e tente novamente.');
+  }
+}
+
+// ── MODAL EDITAR PROPOSTA ────────────────────────────────
+let _editRecordId = null;
+
+function abrirModalEditar(recordId) {
+  _editRecordId = recordId;
+  const rec = (window._recMap || {})[recordId];
+  const flds = rec ? rec.fields : {};
+
+  document.getElementById('e_nome').value         = flds['Nome do Cliente'] || '';
+  document.getElementById('e_cpf').value          = flds['CPF'] || '';
+  document.getElementById('e_local').value        = flds['Endereço do Evento'] || '';
+  document.getElementById('e_data_orc').value     = flds['Data do Orçamento'] || '';
+  document.getElementById('e_data_evento').value  = flds['Data do Evento'] || '';
+  document.getElementById('e_hora_evento').value  = flds['Hora do Evento'] || '';
+  document.getElementById('e_horas').value        = flds['Horas de Duração'] || '';
+  document.getElementById('e_valor').value        = flds['Valor do Orçamento'] || '';
+  document.getElementById('e_conv').value         = flds['Converteu?'] || '';
+
+  const selServ = document.getElementById('e_servico');
+  const svc = flds['Tipo de Serviço'] || '';
+  for(let i=0;i<selServ.options.length;i++){ if(selServ.options[i].text===svc){selServ.selectedIndex=i;break;} }
+
+  const selStatus = document.getElementById('e_status');
+  const st = flds['Status'] || '';
+  for(let i=0;i<selStatus.options.length;i++){ if(selStatus.options[i].text===st){selStatus.selectedIndex=i;break;} }
+
+  document.getElementById('editModalErr').style.display = 'none';
+  document.getElementById('editModalOk').style.display  = 'none';
+  document.getElementById('btnSalvarEdicao').disabled    = false;
+  document.getElementById('btnSalvarEdicao').textContent = 'Salvar alterações';
+  document.getElementById('editModalTitle').textContent  = 'Editar Proposta — ' + (flds['Nome do Cliente'] || '');
+  document.getElementById('editModalOverlay').classList.add('open');
+}
+
+function fecharModalEditar() {
+  document.getElementById('editModalOverlay').classList.remove('open');
+  _editRecordId = null;
+}
+
+function numOrNull(id) { const v = document.getElementById(id).value; return v===''? null : parseFloat(v); }
+function strOrNull(id) { const v = document.getElementById(id).value.trim(); return v===''? null : v; }
+
+async function salvarEdicao() {
+  const btn = document.getElementById('btnSalvarEdicao');
+  const errEl = document.getElementById('editModalErr');
+  const okEl  = document.getElementById('editModalOk');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  const nome = document.getElementById('e_nome').value.trim();
+  if(!nome) {
+    errEl.textContent = 'Informe o nome do cliente.';
+    errEl.style.display = 'inline';
+    return;
+  }
+
+  const fields = {
+    'Nome do Cliente':     nome,
+    'CPF':                 strOrNull('e_cpf'),
+    'Tipo de Serviço':     document.getElementById('e_servico').value || null,
+    'Status':              document.getElementById('e_status').value || null,
+    'Converteu?':          document.getElementById('e_conv').value || null,
+    'Valor do Orçamento':  numOrNull('e_valor'),
+    'Data do Orçamento':   document.getElementById('e_data_orc').value || null,
+    'Data do Evento':      document.getElementById('e_data_evento').value || null,
+    'Hora do Evento':      document.getElementById('e_hora_evento').value || null,
+    'Horas de Duração':    numOrNull('e_horas'),
+    'Endereço do Evento':  strOrNull('e_local'),
+  };
+
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try {
+    const pr = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLE_ID}/${_editRecordId}`, {
+      method: 'PATCH',
+      headers: {'Authorization': 'Bearer ' + _t, 'Content-Type': 'application/json'},
+      body: JSON.stringify({fields})
+    });
+    if(!pr.ok) throw new Error('PATCH falhou: ' + pr.status);
+
+    okEl.textContent = '✓ Alterações salvas!';
+    okEl.style.display = 'inline';
+    btn.disabled = false;
+    btn.textContent = 'Salvar alterações';
+    await loadData();
+    setTimeout(fecharModalEditar, 1200);
+  } catch(e) {
+    console.error(e);
+    errEl.textContent = 'Erro ao salvar. Tente novamente.';
+    errEl.style.display = 'inline';
+    btn.disabled = false;
+    btn.textContent = 'Salvar alterações';
   }
 }
 
