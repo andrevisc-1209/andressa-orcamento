@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Andressa Pimentel · Agenda</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--text:#e8ddd0;--muted:#7a6e62;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
+
+/* PASSWORD GATE */
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.gate-box{background:var(--surface);border:1px solid var(--border);padding:48px 40px;text-align:center;max-width:360px;width:100%}
+.gate-logo{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
+.gate-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:36px}
+.gate-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
+.gate-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:10px 0;outline:none;transition:border-color .2s;margin-bottom:24px}
+.gate-input:focus{border-bottom-color:var(--gold)}
+.gate-btn{width:100%;padding:14px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.gate-btn:hover{background:var(--gold);color:var(--bg)}
+.gate-error{font-size:11px;color:var(--red);margin-top:14px;display:none;letter-spacing:.5px}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:2px;color:var(--gold)}
+.nav-links{display:flex;gap:4px;flex-wrap:wrap}
+.nav-link{padding:8px 16px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;border-bottom:2px solid transparent}
+.nav-link.active{color:var(--gold);border-bottom-color:var(--gold)}
+.nav-link:hover{color:var(--text)}
+.nav-refresh{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.nav-refresh:hover{border-color:var(--gold);color:var(--gold)}
+
+/* MAIN */
+main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
+.page-title{margin-bottom:28px}
+.page-title h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;letter-spacing:1px;margin-bottom:4px}
+.page-title p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+/* LOADING */
+.loading{text-align:center;padding:80px 20px;color:var(--muted)}
+.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SECTION HEADER */
+.sec-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-d);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* CALENDAR */
+.cal-card{background:var(--surface);border:1px solid var(--border);padding:24px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.cal-nav-group{display:flex;align-items:center;gap:10px}
+.cal-month{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);letter-spacing:1px;min-width:190px;text-align:center}
+.cal-btn{background:none;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;cursor:pointer;font-size:13px;transition:all .2s;flex-shrink:0}
+.cal-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cal-today-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:7px 14px;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.cal-today-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.cal-head{background:#1a1815;padding:9px 4px;text-align:center;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.cal-day{background:var(--surface);min-height:82px;padding:8px 7px;position:relative;cursor:pointer;transition:background .15s}
+.cal-day:hover{background:#1b1815}
+.cal-day.empty{background:#0f0e0c;cursor:default}
+.cal-day.today .cal-daynum{color:var(--gold);font-weight:500}
+.cal-day.today{box-shadow:inset 0 0 0 1px var(--gold-d)}
+.cal-day.selected{background:#201c15;box-shadow:inset 0 0 0 1px var(--gold)}
+.cal-daynum{font-size:12px;color:var(--text)}
+.cal-day.empty .cal-daynum{color:var(--muted);opacity:.25}
+.cal-dots{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap}
+.cal-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.cal-count{position:absolute;bottom:6px;right:7px;font-size:9px;color:var(--gold-d)}
+
+/* DAY PANEL */
+.day-panel{background:var(--surface);border:1px solid var(--border);padding:22px 26px;margin-top:14px}
+.day-panel-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.ev-item{display:flex;gap:18px;padding:13px 0;border-bottom:1px solid #1e1c18}
+.ev-item:last-child{border-bottom:none}
+.ev-time{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold);min-width:58px;flex-shrink:0}
+.ev-info{flex:1}
+.ev-type{font-size:13px;color:var(--text)}
+.ev-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.ev-empty{color:var(--muted);font-size:12px;padding:16px 0;text-align:center}
+
+/* MONTH TABLE */
+.table-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
+.card-sub{font-size:10px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#181614}
+.badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px}
+.badge-fechado{background:rgba(106,175,126,.15);color:#6aaf7e}
+.badge-perdido{background:rgba(192,97,78,.15);color:#c0614e}
+.badge-enviado{background:rgba(91,141,184,.15);color:#5b8db8}
+.badge-negociando{background:rgba(201,160,48,.15);color:#c9a030}
+
+@media(max-width:700px){
+  .cal-day{min-height:60px;padding:6px 5px}
+  .cal-month{font-size:17px;min-width:140px}
+  th:nth-child(5),td:nth-child(5){display:none}
+}
+@media(max-width:480px){
+  nav{padding:0 16px}
+  .cal-day{min-height:48px}
+  .cal-dots{display:none}
+  th:nth-child(4),td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">Andressa Pimentel</div>
+    <div class="gate-sub">Fotografia · Área restrita</div>
+    <label class="gate-label">Senha de acesso</label>
+    <input class="gate-input" id="pwdInput" type="password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <button class="gate-btn" onclick="checkPwd()">Entrar</button>
+    <div class="gate-error" id="pwdErr">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<nav>
+  <span class="nav-logo">Andressa Pimentel</span>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Orçamento</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link active" href="agenda.html">Agenda</a>
+  </div>
+  <button class="nav-refresh" onclick="loadData()">↻ Atualizar</button>
+</nav>
+
+<main>
+  <div class="page-title">
+    <h1>Agenda</h1>
+    <p>Controle mensal de eventos e compromissos</p>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando dados…</p>
+  </div>
+
+  <div id="content" style="display:none">
+
+    <div class="cal-card">
+      <div class="cal-nav">
+        <div class="cal-nav-group">
+          <button class="cal-btn" onclick="mesAnterior()">‹</button>
+          <div class="cal-month" id="calMonthLabel">—</div>
+          <button class="cal-btn" onclick="mesProximo()">›</button>
+        </div>
+        <button class="cal-today-btn" onclick="hojeBtn()">Hoje</button>
+      </div>
+      <div class="cal-grid" id="calHead"></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div class="day-panel">
+      <div class="day-panel-title" id="dayPanelTitle">—</div>
+      <div id="dayPanelBody"></div>
+    </div>
+
+    <div class="sec-title">Eventos do mês</div>
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">Lista completa</span>
+        <span class="card-sub" id="monthCount">—</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>Tipo de evento</th>
+              <th>Cliente</th>
+              <th>Local</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="monthListBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── Auth ──────────────────────────────────────────────
+const PWD_HASH = '90ba3b726ab10bf09eaf2b3f4449421711094bd9c7246e6d29fcb106cf7486a3';
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPwd() {
+  const val = document.getElementById('pwdInput').value;
+  const h = await sha256(val);
+  if(h === PWD_HASH) {
+    document.getElementById('gate').style.display='none';
+    sessionStorage.setItem('ap_auth','1');
+    loadData();
+  } else {
+    document.getElementById('pwdErr').style.display='block';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+if(sessionStorage.getItem('ap_auth')==='1') document.getElementById('gate').style.display='none';
+else { document.getElementById('loading').style.display='none'; }
+
+// ── Config ──────────────────────────────────────────
+const _t   = [atob('cGF0TWJ5U1RkYjFBWTNoY0guMTQ1MDNlODRlODI5MDUyNjBkNTc2YzYwYjRhNTk2NzU0'), atob('Yzg1OTFkMGQzNGVjMzdmYjQxMzg0ZTgzNGJkNDZhYg==')].join('');
+const BASE = 'appmWjJHXwYihOkfZ';
+const TBL  = 'Or%C3%A7amentos';
+
+// ── Helpers ──
+const fmtDate  = d => { if(!d) return '—'; const[y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; };
+const BADGE = s => {
+  const m={'Fechado':'fechado','Perdido':'perdido','Enviado':'enviado','Negociando':'negociando'};
+  return `<span class="badge badge-${m[s]||'enviado'}">${s||'—'}</span>`;
+};
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const pad = n => String(n).padStart(2,'0');
+function fmtDateLong(key){ const[y,m,d]=key.split('-'); return `${parseInt(d)} de ${MESES[parseInt(m)-1].toLowerCase()} de ${y}`; }
+function todayKey(){ const t=new Date(); return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`; }
+
+document.getElementById('calHead').innerHTML = DIAS_SEMANA.map(d=>`<div class="cal-head">${d}</div>`).join('');
+
+async function fetchAll() {
+  let records=[], offset=null;
+  const fields=['ID','Nome do Cliente','Tipo de Serviço','Status','Data do Evento','Hora do Evento','Endereço do Evento'];
+  const fp = fields.map(f=>`fields%5B%5D=${encodeURIComponent(f)}`).join('&');
+  do {
+    const url=`https://api.airtable.com/v0/${BASE}/${TBL}?${fp}${offset?'&offset='+offset:''}`;
+    const r=await fetch(url,{headers:{'Authorization':`Bearer ${_t}`}});
+    const d=await r.json();
+    records=records.concat(d.records||[]);
+    offset=d.offset||null;
+  } while(offset);
+  return records;
+}
+
+// ── Estado ──
+let viewYear, viewMonth, selectedDateKey = null;
+let eventsByDate = {}, allEvents = [];
+{
+  const t = new Date();
+  viewYear = t.getFullYear();
+  viewMonth = t.getMonth();
+}
+
+function buildAgenda(records) {
+  eventsByDate = {};
+  allEvents = [];
+  records.forEach(r=>{
+    const f = r.fields;
+    const dt = f['Data do Evento'];
+    if(!dt) return;
+    const ev = {
+      id: r.id,
+      data: dt,
+      hora: f['Hora do Evento']||'',
+      tipo: f['Tipo de Serviço']||'Não informado',
+      cliente: f['Nome do Cliente']||'—',
+      local: f['Endereço do Evento']||'—',
+      status: f['Status']||''
+    };
+    allEvents.push(ev);
+    (eventsByDate[dt] = eventsByDate[dt]||[]).push(ev);
+  });
+  Object.values(eventsByDate).forEach(list=>list.sort((a,b)=>(a.hora||'').localeCompare(b.hora||'')));
+  if(selectedDateKey === null) selectedDateKey = todayKey();
+  renderCalendar();
+}
+
+function renderCalendar(){
+  document.getElementById('calMonthLabel').textContent = MESES[viewMonth]+' de '+viewYear;
+  const firstWeekday = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+  const tKey = todayKey();
+
+  let html = '';
+  for(let i=0;i<firstWeekday;i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const key = `${viewYear}-${pad(viewMonth+1)}-${pad(d)}`;
+    const evs = eventsByDate[key]||[];
+    const cls = ['cal-day'];
+    if(key===tKey) cls.push('today');
+    if(key===selectedDateKey) cls.push('selected');
+    html += `<div class="${cls.join(' ')}" onclick="selecionarDia('${key}')">
+      <div class="cal-daynum">${d}</div>
+      ${evs.length? `<div class="cal-dots">${evs.slice(0,4).map(()=>'<span class="cal-dot"></span>').join('')}</div><div class="cal-count">${evs.length}</div>`:''}
+    </div>`;
+  }
+  const totalCells = firstWeekday + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for(let i=0;i<trailing;i++) html += `<div class="cal-day empty"></div>`;
+  document.getElementById('calGrid').innerHTML = html;
+
+  renderDayPanel();
+  renderMonthList();
+}
+
+function selecionarDia(key){
+  selectedDateKey = key;
+  renderCalendar();
+}
+
+function renderDayPanel(){
+  const evs = selectedDateKey ? (eventsByDate[selectedDateKey]||[]) : [];
+  document.getElementById('dayPanelTitle').textContent = selectedDateKey ? fmtDateLong(selectedDateKey) : 'Selecione um dia';
+  if(!evs.length){
+    document.getElementById('dayPanelBody').innerHTML = `<div class="ev-empty">Nenhum evento nesta data.</div>`;
+    return;
+  }
+  document.getElementById('dayPanelBody').innerHTML = evs.map(ev=>`
+    <div class="ev-item">
+      <div class="ev-time">${ev.hora||'—'}</div>
+      <div class="ev-info">
+        <div class="ev-type">${ev.tipo} — ${ev.cliente}</div>
+        <div class="ev-sub">${ev.local} · ${BADGE(ev.status)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderMonthList(){
+  const prefix = `${viewYear}-${pad(viewMonth+1)}`;
+  const monthEvs = allEvents.filter(e=>e.data.slice(0,7)===prefix)
+    .sort((a,b)=> a.data===b.data ? (a.hora||'').localeCompare(b.hora||'') : a.data.localeCompare(b.data));
+  document.getElementById('monthCount').textContent = `${monthEvs.length} evento${monthEvs.length!==1?'s':''}`;
+  document.getElementById('monthListBody').innerHTML = monthEvs.map(ev=>`
+    <tr>
+      <td style="color:var(--text)">${fmtDate(ev.data)}</td>
+      <td style="color:var(--gold)">${ev.hora||'—'}</td>
+      <td>${ev.tipo}</td>
+      <td>${ev.cliente}</td>
+      <td style="color:var(--muted)">${ev.local}</td>
+      <td>${BADGE(ev.status)}</td>
+    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum evento neste mês.</td></tr>`;
+}
+
+function mesAnterior(){ viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} renderCalendar(); }
+function mesProximo(){ viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} renderCalendar(); }
+function hojeBtn(){ const t=new Date(); viewYear=t.getFullYear(); viewMonth=t.getMonth(); selectedDateKey=todayKey(); renderCalendar(); }
+
+async function loadData() {
+  if(sessionStorage.getItem('ap_auth')!=='1') return;
+  document.getElementById('loading').style.display='block';
+  document.getElementById('content').style.display='none';
+  try {
+    const records=await fetchAll();
+    buildAgenda(records);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('content').style.display='block';
+  } catch(e) {
+    document.getElementById('loading').innerHTML='<p style="color:var(--red)">Erro ao carregar. Tente novamente.</p>';
+    console.error(e);
+  }
+}
+
+if(sessionStorage.getItem('ap_auth')==='1') loadData();
+else document.getElementById('loading').style.display='none';
+</script>
+</body>
+</html>

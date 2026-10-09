@@ -97,6 +97,11 @@ tr:hover td{background:#181614}
 .badge-negociando{background:rgba(201,160,48,.15);color:#c9a030}
 .conv-sim{color:#6aaf7e;font-size:12px}
 .conv-nao{color:#c0614e;font-size:12px}
+.conv-select{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.5px;padding:5px 8px;cursor:pointer;outline:none;transition:border-color .2s}
+.conv-select:focus{border-color:var(--gold)}
+.conv-select.conv-sim{border-color:rgba(106,175,126,.4);color:#6aaf7e}
+.conv-select.conv-nao{border-color:rgba(192,97,78,.4);color:#c0614e}
+.conv-select option{background:#1a1815;color:var(--text)}
 .btn-contrato{padding:4px 12px;background:transparent;border:1px solid var(--gold-d);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
 .btn-contrato:hover{background:var(--gold);color:var(--bg)}
 
@@ -142,6 +147,7 @@ tr:hover td{background:#181614}
   th:nth-child(3),td:nth-child(3){display:none}
   th:nth-child(7),td:nth-child(7){display:none}
 }
+.nav-links{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -163,6 +169,7 @@ tr:hover td{background:#181614}
   <div class="nav-links">
     <a class="nav-link" href="index.html">Orçamento</a>
     <a class="nav-link active" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="agenda.html">Agenda</a>
   </div>
   <button class="nav-refresh" onclick="loadData()">↻ Atualizar</button>
 </nav>
@@ -257,7 +264,8 @@ tr:hover td{background:#181614}
               <th>Cliente</th>
               <th>Serviço</th>
               <th>Valor</th>
-              <th>Data</th>
+              <th>Adicionado em</th>
+              <th>Data do evento</th>
               <th>Status</th>
               <th>Converteu?</th>
               <th>Contrato</th>
@@ -555,19 +563,30 @@ function buildDashboard(records) {
     const flds=f(r);
     window._recMap[r.id] = {id: r.id, fields: flds};
     const conv=flds['Converteu?']||'';
-    const convHtml=conv==='Sim'?'<span class="conv-sim">✓ Sim</span>':conv==='Não'?'<span class="conv-nao">✕ Não</span>':'<span style="color:var(--muted)">—</span>';
+    const convClass = conv==='Sim'?'conv-sim':conv==='Não'?'conv-nao':'';
+    const convHtml = `<select class="conv-select ${convClass}" onchange="atualizarConverteu('${r.id}', this.value, this)">
+      <option value="" ${conv===''?'selected':''}>—</option>
+      <option value="Sim" ${conv==='Sim'?'selected':''}>✓ Sim</option>
+      <option value="Não" ${conv==='Não'?'selected':''}>✕ Não</option>
+    </select>`;
     const dataContrato = flds['Data do Contrato'];
     const contratoHtml = dataContrato
       ? `<span style="color:var(--green);font-size:11px">&#10003; ${fmtDate(dataContrato)}</span>&nbsp;<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Regerar</button>`
       : `<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Gerar contrato</button>`;
+    const dataEvento = flds['Data do Evento'];
+    const horaEvento = flds['Hora do Evento'];
+    const dataEventoHtml = dataEvento
+      ? `${fmtDate(dataEvento)}${horaEvento?` <span style="color:var(--gold-d)">· ${horaEvento}</span>`:''}`
+      : '<span style="color:var(--muted)">—</span>';
     return `<tr id="row-${r.id}">
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
       <td>${flds['Nome do Cliente']||'—'}</td>
       <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
       <td style="color:var(--gold)">${flds['Valor do Orçamento']?fmtMoney(flds['Valor do Orçamento']):'—'}</td>
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
+      <td>${dataEventoHtml}</td>
       <td>${BADGE(flds['Status']||'')}</td>
-      <td>${convHtml}</td>
+      <td id="conv-${r.id}">${convHtml}</td>
       <td id="ctd-${r.id}">${contratoHtml}</td>
     </tr>`;
   }).join('');
@@ -590,6 +609,28 @@ async function loadData() {
 
 if(sessionStorage.getItem('ap_auth')==='1') loadData();
 else document.getElementById('loading').style.display='none';
+
+// ── Atualizar "Converteu?" direto na tabela ─────────────
+async function atualizarConverteu(recordId, valor, selEl) {
+  selEl.disabled = true;
+  try {
+    const pr = await fetch(`https://api.airtable.com/v0/${BASE}/${TABLE_ID}/${recordId}`, {
+      method: 'PATCH',
+      headers: {'Authorization': 'Bearer ' + _t, 'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: {'Converteu?': valor}})
+    });
+    if(!pr.ok) throw new Error('PATCH falhou: ' + pr.status);
+    if(window._recMap && window._recMap[recordId]) {
+      window._recMap[recordId].fields['Converteu?'] = valor;
+    }
+    // Recarrega tudo para manter cards, gráficos e BI consistentes com a mudança
+    await loadData();
+  } catch(e) {
+    console.error(e);
+    selEl.disabled = false;
+    alert('Não foi possível salvar. Verifique sua conexão e tente novamente.');
+  }
+}
 
 // ── MODAL ──────────────────────────────────────────────
 let _currentRecordId = null;
