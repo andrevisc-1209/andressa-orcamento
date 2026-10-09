@@ -104,6 +104,8 @@ tr:hover td{background:#181614}
 .conv-select option{background:#1a1815;color:var(--text)}
 .btn-contrato{padding:4px 12px;background:transparent;border:1px solid var(--gold-d);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
 .btn-contrato:hover{background:var(--gold);color:var(--bg)}
+.edit-icon-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 4px;vertical-align:middle;transition:color .2s}
+.edit-icon-btn:hover{color:var(--gold)}
 
 /* MODAL */
 #modalOverlay,#editModalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
@@ -269,7 +271,6 @@ tr:hover td{background:#181614}
               <th>Status</th>
               <th>Converteu?</th>
               <th>Contrato</th>
-              <th>Ações</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -669,7 +670,7 @@ function buildDashboard(records) {
       : '<span style="color:var(--muted)">—</span>';
     return `<tr id="row-${r.id}">
       <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
-      <td>${flds['Nome do Cliente']||'—'}</td>
+      <td>${flds['Nome do Cliente']||'—'} <button class="edit-icon-btn" onclick="abrirModalEditar('${r.id}')" title="Editar proposta">✎</button></td>
       <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
       <td style="color:var(--gold)">${flds['Valor do Orçamento']?fmtMoney(flds['Valor do Orçamento']):'—'}</td>
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
@@ -677,7 +678,6 @@ function buildDashboard(records) {
       <td>${BADGE(flds['Status']||'')}</td>
       <td id="conv-${r.id}">${convHtml}</td>
       <td id="ctd-${r.id}">${contratoHtml}</td>
-      <td><button class="btn-contrato" onclick="abrirModalEditar('${r.id}')">✎ Editar</button></td>
     </tr>`;
   }).join('');
 }
