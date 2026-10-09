@@ -6,7 +6,7 @@
 <title>Andressa Pimentel · Agenda</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--text:#e8ddd0;--muted:#7a6e62;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030}
+:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--gold-fill:#d9b77c;--text:#e8ddd0;--muted:#9c8f82;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030;--input-bg:#1c1815;--input-border:#3a332a;--text-dark:#15120e}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
 
@@ -15,11 +15,11 @@ body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;
 .gate-box{background:var(--surface);border:1px solid var(--border);padding:48px 40px;text-align:center;max-width:360px;width:100%}
 .gate-logo{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
 .gate-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:36px}
-.gate-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
-.gate-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:10px 0;outline:none;transition:border-color .2s;margin-bottom:24px}
-.gate-input:focus{border-bottom-color:var(--gold)}
-.gate-btn{width:100%;padding:14px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.gate-btn:hover{background:var(--gold);color:var(--bg)}
+.gate-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
+.gate-input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:3px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;margin-bottom:24px}
+.gate-input:focus{border-color:var(--gold)}
+.gate-btn{width:100%;padding:14px;background:var(--gold-fill);border:1px solid var(--gold-fill);color:var(--text-dark);font-family:'Montserrat',sans-serif;font-weight:600;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.gate-btn:hover{background:var(--gold);border-color:var(--gold)}
 .gate-error{font-size:11px;color:var(--red);margin-top:14px;display:none;letter-spacing:.5px}
 
 /* NAV */
@@ -44,7 +44,7 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* SECTION HEADER */
-.sec-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-d);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.sec-title{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 
 /* CALENDAR */
 .cal-card{background:var(--surface);border:1px solid var(--border);padding:24px}
@@ -63,22 +63,27 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .cal-day.today .cal-daynum{color:var(--gold);font-weight:500}
 .cal-day.today{box-shadow:inset 0 0 0 1px var(--gold-d)}
 .cal-day.selected{background:#201c15;box-shadow:inset 0 0 0 1px var(--gold)}
+.cal-day.has-events{box-shadow:inset 0 -3px 0 var(--gold)}
+.cal-day.has-events.selected{box-shadow:inset 0 0 0 1px var(--gold),inset 0 -3px 0 var(--gold)}
 .cal-daynum{font-size:12px;color:var(--text)}
 .cal-day.empty .cal-daynum{color:var(--muted);opacity:.25}
-.cal-dots{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap}
-.cal-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
-.cal-count{position:absolute;bottom:6px;right:7px;font-size:9px;color:var(--gold-d)}
+.cal-dots{display:flex;gap:4px;margin-top:9px;flex-wrap:wrap}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px rgba(201,169,110,.7)}
+.cal-count{position:absolute;bottom:6px;right:7px;font-size:10px;font-weight:600;color:var(--gold)}
 
 /* DAY PANEL */
 .day-panel{background:var(--surface);border:1px solid var(--border);padding:22px 26px;margin-top:14px}
-.day-panel-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.day-panel-title{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .ev-item{display:flex;gap:18px;padding:13px 0;border-bottom:1px solid #1e1c18}
 .ev-item:last-child{border-bottom:none}
 .ev-time{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold);min-width:58px;flex-shrink:0}
 .ev-info{flex:1}
 .ev-type{font-size:13px;color:var(--text)}
 .ev-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.ev-empty{color:var(--muted);font-size:12px;padding:16px 0;text-align:center}
+.ev-empty{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:12px;padding:30px 20px;text-align:center;background:#19160f;border:1px dashed var(--border);border-radius:4px}
+.ev-empty-icon{font-size:22px;opacity:.5;color:var(--gold-d)}
+.map-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);border-radius:3px;padding:4px 9px;display:inline-block;transition:all .2s}
+.map-link:hover{border-color:var(--gold);background:rgba(201,169,110,.1)}
 
 /* MONTH TABLE */
 .table-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
@@ -86,7 +91,7 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
 .card-sub{font-size:10px;color:var(--muted)}
 table{width:100%;border-collapse:collapse}
-th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+th{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding:12px 18px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
 td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#181614}
@@ -180,6 +185,7 @@ tr:hover td{background:#181614}
               <th>Cliente</th>
               <th>Local</th>
               <th>Status</th>
+              <th>Mapa</th>
             </tr>
           </thead>
           <tbody id="monthListBody"></tbody>
@@ -293,6 +299,7 @@ function renderCalendar(){
     const cls = ['cal-day'];
     if(key===tKey) cls.push('today');
     if(key===selectedDateKey) cls.push('selected');
+    if(evs.length) cls.push('has-events');
     html += `<div class="${cls.join(' ')}" onclick="selecionarDia('${key}')">
       <div class="cal-daynum">${d}</div>
       ${evs.length? `<div class="cal-dots">${evs.slice(0,4).map(()=>'<span class="cal-dot"></span>').join('')}</div><div class="cal-count">${evs.length}</div>`:''}
@@ -316,7 +323,7 @@ function renderDayPanel(){
   const evs = selectedDateKey ? (eventsByDate[selectedDateKey]||[]) : [];
   document.getElementById('dayPanelTitle').textContent = selectedDateKey ? fmtDateLong(selectedDateKey) : 'Selecione um dia';
   if(!evs.length){
-    document.getElementById('dayPanelBody').innerHTML = `<div class="ev-empty">Nenhum evento nesta data.</div>`;
+    document.getElementById('dayPanelBody').innerHTML = `<div class="ev-empty"><span class="ev-empty-icon">✧</span><span>Nenhum evento nesta data.</span></div>`;
     return;
   }
   document.getElementById('dayPanelBody').innerHTML = evs.map(ev=>`
@@ -334,15 +341,21 @@ function renderMonthList(){
   const monthEvs = allEvents.filter(e=>e.data.slice(0,7)===prefix)
     .sort((a,b)=> a.data===b.data ? (a.hora||'').localeCompare(b.hora||'') : a.data.localeCompare(b.data));
   document.getElementById('monthCount').textContent = `${monthEvs.length} evento${monthEvs.length!==1?'s':''}`;
-  document.getElementById('monthListBody').innerHTML = monthEvs.map(ev=>`
-    <tr>
+  document.getElementById('monthListBody').innerHTML = monthEvs.map(ev=>{
+    const temLocal = ev.local && ev.local!=='—';
+    const mapaHtml = temLocal
+      ? `<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.local)}" target="_blank" rel="noopener" title="Abrir no Google Maps">🗺</a>`
+      : '<span style="color:var(--muted)">—</span>';
+    return `<tr>
       <td style="color:var(--text)">${fmtDate(ev.data)}</td>
       <td style="color:var(--gold)">${ev.hora||'—'}</td>
       <td>${ev.tipo}</td>
       <td>${ev.cliente}</td>
       <td style="color:var(--muted)">${ev.local}</td>
       <td>${BADGE(ev.status)}</td>
-    </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Nenhum evento neste mês.</td></tr>`;
+      <td>${mapaHtml}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum evento neste mês.</td></tr>`;
 }
 
 function mesAnterior(){ viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} renderCalendar(); }

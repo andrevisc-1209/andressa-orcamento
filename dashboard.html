@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 <style>
-:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--text:#e8ddd0;--muted:#7a6e62;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030}
+:root{--bg:#0d0c0b;--surface:#141210;--border:#2e2820;--gold:#c9a96e;--gold-d:#8a6e3e;--gold-fill:#d9b77c;--text:#e8ddd0;--muted:#9c8f82;--green:#6aaf7e;--red:#c0614e;--blue:#5b8db8;--yellow:#c9a030;--input-bg:#1c1815;--input-border:#3a332a;--text-dark:#15120e}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;min-height:100vh}
 
@@ -17,11 +17,11 @@ body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;
 .gate-box{background:var(--surface);border:1px solid var(--border);padding:48px 40px;text-align:center;max-width:360px;width:100%}
 .gate-logo{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
 .gate-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:36px}
-.gate-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
-.gate-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:10px 0;outline:none;transition:border-color .2s;margin-bottom:24px}
-.gate-input:focus{border-bottom-color:var(--gold)}
-.gate-btn{width:100%;padding:14px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.gate-btn:hover{background:var(--gold);color:var(--bg)}
+.gate-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;text-align:left;margin-bottom:8px}
+.gate-input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:3px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;margin-bottom:24px}
+.gate-input:focus{border-color:var(--gold)}
+.gate-btn{width:100%;padding:14px;background:var(--gold-fill);border:1px solid var(--gold-fill);color:var(--text-dark);font-family:'Montserrat',sans-serif;font-weight:600;font-size:10px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.gate-btn:hover{background:var(--gold);border-color:var(--gold)}
 .gate-error{font-size:11px;color:var(--red);margin-top:14px;display:none;letter-spacing:.5px}
 
 /* NAV */
@@ -46,7 +46,7 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* SECTION HEADER */
-.sec-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-d);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.sec-title{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 
 /* CARDS */
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px}
@@ -57,16 +57,20 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .card.blue::before{background:var(--blue)}
 .card.yellow::before{background:var(--yellow)}
 .card.gold::before{background:var(--gold)}
-.card-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.card-label{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .card-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1;margin-bottom:4px}
 .card-value.sm{font-size:20px}
-.card-sub{font-size:10px;color:var(--muted);margin-top:6px}
-.card-icon{position:absolute;bottom:14px;right:16px;font-size:22px;opacity:.12}
+.card-sub{font-size:10.5px;color:var(--muted);margin-top:6px}
+.card-icon{position:absolute;bottom:14px;right:16px;font-size:26px;opacity:.3}
+.card.green .card-icon{color:var(--green)}
+.card.red .card-icon{color:var(--red)}
+.card.blue .card-icon{color:var(--blue)}
+.card.gold .card-icon{color:var(--gold)}
 
 /* CHARTS */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .chart-card{background:var(--surface);border:1px solid var(--border);padding:24px}
-.chart-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.chart-title{font-size:10.5px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
 .chart-wrap{position:relative;height:210px}
 .chart-wrap-wide{position:relative;height:190px}
 .chart-full{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:12px}
@@ -85,9 +89,11 @@ main{max-width:1140px;margin:0 auto;padding:32px 20px 60px}
 .table-card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
 .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .table-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
-table{width:100%;border-collapse:collapse}
-th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 20px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
-td{font-size:13px;padding:12px 20px;border-bottom:1px solid #1e1c18;vertical-align:middle}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th{font-size:10px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding:12px 18px;text-align:left;border-bottom:1px solid var(--border)}
+td{font-size:13px;padding:14px 18px;border-bottom:1px solid #1e1c18;vertical-align:middle;white-space:nowrap}
+th:nth-child(2),td:nth-child(2){min-width:170px;white-space:normal}
+th:nth-child(3),td:nth-child(3){min-width:120px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#181614}
 .badge{display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px}
@@ -102,8 +108,12 @@ tr:hover td{background:#181614}
 .conv-select.conv-sim{border-color:rgba(106,175,126,.4);color:#6aaf7e}
 .conv-select.conv-nao{border-color:rgba(192,97,78,.4);color:#c0614e}
 .conv-select option{background:#1a1815;color:var(--text)}
-.btn-contrato{padding:4px 12px;background:transparent;border:1px solid var(--gold-d);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
+.btn-contrato{padding:5px 12px;background:transparent;border:1px solid var(--gold-d);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
 .btn-contrato:hover{background:var(--gold);color:var(--bg)}
+.btn-contrato.is-muted{opacity:.45;border-color:var(--border);color:var(--muted)}
+.btn-contrato.is-muted:hover{opacity:1;border-color:var(--gold-d);color:var(--gold);background:transparent}
+.btn-contrato.is-ready{background:var(--gold-fill);border-color:var(--gold-fill);color:var(--text-dark);font-weight:600;opacity:1}
+.btn-contrato.is-ready:hover{background:var(--gold);border-color:var(--gold)}
 .edit-icon-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 4px;vertical-align:middle;transition:color .2s}
 .edit-icon-btn:hover{color:var(--gold)}
 
@@ -117,20 +127,22 @@ tr:hover td{background:#181614}
 .modal-close:hover{color:var(--text)}
 .modal-body{padding:24px 28px}
 .m-field{margin-bottom:18px}
-.m-field label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.m-field input,.m-field select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;padding:7px 0;outline:none;transition:border-color .2s}
-.m-field input:focus,.m-field select:focus{border-bottom-color:var(--gold)}
+.m-field label{display:block;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.m-field input,.m-field select{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:3px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s}
+.m-field input:focus,.m-field select:focus{border-color:var(--gold)}
 .m-field input::placeholder{color:var(--muted)}
 .m-field select option{background:#1a1815}
 .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .m-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.uso-row{display:flex;gap:24px;margin-top:6px}
-.uso-opt{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);cursor:pointer}
-.uso-opt input[type=radio]{accent-color:var(--gold);width:15px;height:15px}
+.uso-row{display:flex;gap:10px;margin-top:6px}
+.uso-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;letter-spacing:.3px;color:var(--muted);cursor:pointer;background:var(--input-bg);border:1px solid var(--input-border);border-radius:3px;padding:12px 10px;text-align:center;transition:all .2s}
+.uso-opt input[type=radio]{display:none}
+.uso-opt:has(input:checked){background:rgba(201,169,110,.12);border-color:var(--gold);color:var(--gold)}
+.uso-opt:hover{border-color:var(--gold-d)}
 .modal-foot{padding:16px 28px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.btn-gerar{padding:12px 28px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;flex-shrink:0}
-.btn-gerar:hover:not(:disabled){background:var(--gold);color:var(--bg)}
-.btn-gerar:disabled{opacity:.5;cursor:not-allowed}
+.btn-gerar{padding:13px 28px;background:var(--gold-fill);border:1px solid var(--gold-fill);color:var(--text-dark);font-family:'Montserrat',sans-serif;font-weight:600;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;flex-shrink:0}
+.btn-gerar:hover:not(:disabled){background:var(--gold);border-color:var(--gold)}
+.btn-gerar:disabled{opacity:.45;cursor:not-allowed}
 .btn-cancelar{padding:12px 20px;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .btn-cancelar:hover{border-color:var(--muted);color:var(--text)}
 .modal-err{font-size:11px;color:var(--red);display:none}
@@ -191,19 +203,19 @@ tr:hover td{background:#181614}
 
     <div class="sec-title">Visão geral</div>
     <div class="cards">
-      <div class="card green">
+      <div class="card gold">
         <div class="card-label">Receita confirmada</div>
         <div class="card-value sm" id="totalGanho">—</div>
         <div class="card-sub" id="countConverteu">—</div>
         <div class="card-icon">✦</div>
       </div>
-      <div class="card blue">
+      <div class="card green">
         <div class="card-label">Taxa de conversão</div>
         <div class="card-value" id="taxaConversao">—</div>
         <div class="card-sub" id="convSub">—</div>
         <div class="card-icon">◎</div>
       </div>
-      <div class="card yellow">
+      <div class="card blue">
         <div class="card-label">Pipeline em aberto</div>
         <div class="card-value sm" id="totalAberto">—</div>
         <div class="card-sub" id="countAberto">—</div>
@@ -487,7 +499,7 @@ const BADGE = s => {
   return `<span class="badge badge-${m[s]||'enviado'}">${s||'—'}</span>`;
 };
 const STATUS_COLORS = {Fechado:'#6aaf7e',Perdido:'#c0614e',Enviado:'#5b8db8',Negociando:'#c9a030'};
-const CHART_CFG = {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a6e62',font:{family:'Montserrat',size:11},boxWidth:12}}}};
+const CHART_CFG = {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9c8f82',font:{family:'Montserrat',size:11},boxWidth:12}}}};
 
 let charts = {};
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
@@ -584,10 +596,10 @@ function buildDashboard(records) {
   charts['mensal']=new Chart(document.getElementById('chartMensal'),{
     type:'bar',
     data:{labels:months.map(fmtM),datasets:[{data:months.map(m=>valByMonth[m]),
-      backgroundColor:'rgba(106,175,126,0.65)',borderColor:'#6aaf7e',borderWidth:1,borderRadius:2}]},
+      backgroundColor:'rgba(201,169,110,0.65)',borderColor:'#c9a96e',borderWidth:1,borderRadius:2}]},
     options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
-      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10}},grid:{color:'#1e1c18'}},
-               y:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
+      scales:{x:{ticks:{color:'#9c8f82',font:{family:'Montserrat',size:10}},grid:{color:'#1e1c18'}},
+               y:{ticks:{color:'#9c8f82',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
   });
 
   // ── BI por tipo de serviço ──
@@ -630,8 +642,8 @@ function buildDashboard(records) {
     data:{labels:svcKeys,datasets:[{data:svcKeys.map(k=>svcMap[k].ganho),
       backgroundColor:'rgba(201,169,110,0.7)',borderColor:'#c9a96e',borderWidth:1,borderRadius:2}]},
     options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
-      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
-               y:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
+      scales:{x:{ticks:{color:'#9c8f82',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
+               y:{ticks:{color:'#9c8f82',font:{family:'Montserrat',size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#1e1c18'}}}}
   });
 
   // ── Chart: Conversão por serviço ──
@@ -642,8 +654,8 @@ function buildDashboard(records) {
     data:{labels:svcKeys,datasets:[{data:convRates,
       backgroundColor:'rgba(106,175,126,0.65)',borderColor:'#6aaf7e',borderWidth:1,borderRadius:2}]},
     options:{...CHART_CFG,plugins:{...CHART_CFG.plugins,legend:{display:false}},
-      scales:{x:{ticks:{color:'#7a6e62',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
-               y:{max:100,ticks:{color:'#7a6e62',font:{family:'Montserrat',size:10},callback:v=>v+'%'},grid:{color:'#1e1c18'}}}}
+      scales:{x:{ticks:{color:'#9c8f82',font:{family:'Montserrat',size:9}},grid:{color:'#1e1c18'}},
+               y:{max:100,ticks:{color:'#9c8f82',font:{family:'Montserrat',size:10},callback:v=>v+'%'},grid:{color:'#1e1c18'}}}}
   });
 
   // ── Tabela ──
@@ -659,23 +671,28 @@ function buildDashboard(records) {
       <option value="Sim" ${conv==='Sim'?'selected':''}>✓ Sim</option>
       <option value="Não" ${conv==='Não'?'selected':''}>✕ Não</option>
     </select>`;
+    const status = flds['Status']||'';
+    const isReady = status==='Fechado' || conv==='Sim';
     const dataContrato = flds['Data do Contrato'];
+    const contratoBtnClass = isReady ? 'btn-contrato is-ready' : 'btn-contrato is-muted';
     const contratoHtml = dataContrato
       ? `<span style="color:var(--green);font-size:11px">&#10003; ${fmtDate(dataContrato)}</span>&nbsp;<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Regerar</button>`
-      : `<button class="btn-contrato" onclick="abrirModalContrato('${r.id}')">Gerar contrato</button>`;
+      : `<button class="${contratoBtnClass}" onclick="abrirModalContrato('${r.id}')">Gerar contrato</button>`;
     const dataEvento = flds['Data do Evento'];
     const horaEvento = flds['Hora do Evento'];
     const dataEventoHtml = dataEvento
       ? `${fmtDate(dataEvento)}${horaEvento?` <span style="color:var(--gold-d)">· ${horaEvento}</span>`:''}`
       : '<span style="color:var(--muted)">—</span>';
+    const idFull = flds['ID']||'';
+    const idShort = idFull.includes('-') ? '#'+idFull.split('-').pop() : (idFull||'—');
     return `<tr id="row-${r.id}">
-      <td style="color:var(--muted);font-size:11px">${flds['ID']||'—'}</td>
-      <td>${flds['Nome do Cliente']||'—'} <button class="edit-icon-btn" onclick="abrirModalEditar('${r.id}')" title="Editar proposta">✎</button></td>
+      <td style="color:var(--muted);font-size:11px" title="${idFull}">${idShort}</td>
+      <td style="white-space:normal">${flds['Nome do Cliente']||'—'} <button class="edit-icon-btn" onclick="abrirModalEditar('${r.id}')" title="Editar proposta">✎</button></td>
       <td style="color:var(--muted)">${flds['Tipo de Serviço']||'—'}</td>
       <td style="color:var(--gold)">${flds['Valor do Orçamento']?fmtMoney(flds['Valor do Orçamento']):'—'}</td>
       <td style="color:var(--muted)">${fmtDate(flds['Data do Orçamento'])}</td>
       <td>${dataEventoHtml}</td>
-      <td>${BADGE(flds['Status']||'')}</td>
+      <td>${BADGE(status)}</td>
       <td id="conv-${r.id}">${convHtml}</td>
       <td id="ctd-${r.id}">${contratoHtml}</td>
     </tr>`;

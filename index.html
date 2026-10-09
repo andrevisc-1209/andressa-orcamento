@@ -12,9 +12,13 @@
   --border:   #2e2820;
   --gold:     #c9a96e;
   --gold-dim: #8a6e3e;
+  --gold-fill:#d9b77c;
   --text:     #e8ddd0;
-  --muted:    #7a6e62;
+  --muted:    #9c8f82;
   --error:    #c0614e;
+  --input-bg:     #1c1815;
+  --input-border: #3a332a;
+  --text-dark:    #15120e;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -109,7 +113,8 @@ main {
 .field:last-child { margin-bottom: 0; }
 label {
   display: block;
-  font-size: 9px;
+  font-size: 10px;
+  font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -117,25 +122,24 @@ label {
 }
 input, select, textarea {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
   color: var(--text);
   font-family: 'Montserrat', sans-serif;
   font-weight: 300;
   font-size: 15px;
-  padding: 10px 0;
+  padding: 11px 13px;
   outline: none;
   transition: border-color .25s;
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 0;
   min-height: 44px;
 }
 input:focus, select:focus, textarea:focus {
-  border-bottom-color: var(--gold);
+  border-color: var(--gold);
 }
-input::placeholder, textarea::placeholder { color: #3a3228; }
+input::placeholder, textarea::placeholder { color: #6b5f52; }
 input[type="date"], input[type="time"] {
   color-scheme: dark;
 }
@@ -143,9 +147,10 @@ select option { background: #1a1814; color: var(--text); }
 textarea { resize: none; height: 80px; min-height: 80px; }
 
 .select-wrap { position: relative; }
+.select-wrap select { padding-right: 34px; }
 .select-wrap::after {
   content: '›';
-  position: absolute; right: 4px; top: 50%;
+  position: absolute; right: 12px; top: 50%;
   transform: translateY(-50%) rotate(90deg);
   color: var(--gold-dim); pointer-events: none; font-size: 20px;
 }
@@ -154,7 +159,29 @@ textarea { resize: none; height: 80px; min-height: 80px; }
 
 /* Address field with icon */
 .addr-wrap { position: relative; }
-.addr-wrap input { padding-left: 0; }
+
+/* Segmented control — Uso de imagem */
+.seg-control { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.seg-opt {
+  flex: 1 1 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 300;
+  color: var(--muted);
+  cursor: pointer;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
+  padding: 14px 12px;
+  transition: all .2s;
+}
+.seg-opt input[type="radio"] { display: none; }
+.seg-opt:has(input:checked) { background: rgba(201,169,110,.12); border-color: var(--gold); color: var(--gold); }
+.seg-opt:hover { border-color: var(--gold-dim); }
 .addr-hint {
   font-size: 10px;
   color: var(--muted);
@@ -176,10 +203,11 @@ textarea { resize: none; height: 80px; min-height: 80px; }
 .btn-submit {
   width: 100%;
   padding: 18px;
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
+  background: var(--gold-fill);
+  border: 1px solid var(--gold-fill);
+  color: var(--text-dark);
   font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
   font-size: 11px;
   letter-spacing: 4px;
   text-transform: uppercase;
@@ -187,7 +215,7 @@ textarea { resize: none; height: 80px; min-height: 80px; }
   transition: all .3s;
   min-height: 56px;
 }
-.btn-submit:hover:not(:disabled) { background: var(--gold); color: var(--bg); }
+.btn-submit:hover:not(:disabled) { background: var(--gold); border-color: var(--gold); }
 .btn-submit:disabled { opacity: .45; cursor: not-allowed; }
 .error-msg {
   display: none; margin-top: 14px;
@@ -271,8 +299,8 @@ footer {
   <span style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:#c9a96e">Andressa Pimentel</span>
   <div style="display:flex;gap:4px">
     <a href="index.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c9a96e;text-decoration:none;border-bottom:2px solid #c9a96e">Orçamento</a>
-    <a href="dashboard.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7a6e62;text-decoration:none;border-bottom:2px solid transparent">Dashboard</a>
-    <a href="agenda.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#7a6e62;text-decoration:none;border-bottom:2px solid transparent">Agenda</a>
+    <a href="dashboard.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9c8f82;text-decoration:none;border-bottom:2px solid transparent">Dashboard</a>
+    <a href="agenda.html" style="padding:7px 14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9c8f82;text-decoration:none;border-bottom:2px solid transparent">Agenda</a>
   </div>
 </nav>
 <header class="site-header">
@@ -375,13 +403,13 @@ footer {
         </div>
         <div class="field">
           <label>Uso de imagem pela fotógrafa</label>
-          <div style="display:flex;gap:24px;margin-top:8px">
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:300;cursor:pointer;color:var(--muted)">
-              <input type="radio" name="uso_imagem" value="Autoriza" style="accent-color:var(--gold);width:16px;height:16px"/>
+          <div class="seg-control">
+            <label class="seg-opt">
+              <input type="radio" name="uso_imagem" value="Autoriza"/>
               Autorizar (portfólio e redes sociais)
             </label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:300;cursor:pointer;color:var(--muted)">
-              <input type="radio" name="uso_imagem" value="Não autoriza" style="accent-color:var(--gold);width:16px;height:16px"/>
+            <label class="seg-opt">
+              <input type="radio" name="uso_imagem" value="Não autoriza"/>
               Não autorizar
             </label>
           </div>
